@@ -37,7 +37,7 @@ describe("BreedableNFT", function () {
 
   // TODO Test that the fee is deposited on the escrow smart contract
   // TODO Validate genes result once genes algo is done
-  // TODO test that you cannot breed other ppl's nfts, although could allow it using a special function with for ex approval
+  // TODO test that you cannot breed other ppl's nfts, although could allow it using a special function with for ex approval(this would be separate from BreedableNFT contract, built on top of it)
   it("Breeds a new creature if both parents exist, can breed and the breeding fee is supplied", async () => {
     const breedableNFT: BreedableNFT = await deployBreedableNFT(name, symbol, breedingFee) as BreedableNFT;
     const [father, mother] = await mintPromoMany(breedableNFT, [123, 456]);
