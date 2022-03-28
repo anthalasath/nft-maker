@@ -31,6 +31,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         if (!_exists(tokenId)) {
             revert InexistentCreature(tokenId);
         }
+        // TODO: ok to use block timestamp for CD ?
         if (getCreature(tokenId).breedingBlockedUntil > block.timestamp) {
             revert CannotBreed(tokenId);
         }
