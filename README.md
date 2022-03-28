@@ -6,7 +6,7 @@ Right now, breedable nfts (like cryptokitties) are planned for the MVP.
 ## TODO:
 
 ### high prio:
-- Genetic algo
+- Genes representation / Genetic algo
 - Pic generation
 - UI
 
