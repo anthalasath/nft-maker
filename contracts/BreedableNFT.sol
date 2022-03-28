@@ -26,6 +26,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
     error InexistentCreature(uint256 tokenId);
     error CannotBreed(uint256 tokenId);
     error InsufficentFeeAmount(uint256 feeInWei);
+    error NotOwnerOfToken(uint256 tokenId);
 
     modifier onlyReadyToBreed(uint256 tokenId) {
         if (!_exists(tokenId)) {
@@ -34,6 +35,13 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         // TODO: ok to use block timestamp for CD ?
         if (getCreature(tokenId).breedingBlockedUntil > block.timestamp) {
             revert CannotBreed(tokenId);
+        }
+        _;
+    }
+
+    modifier onlyOwnerOf(uint256 tokenId) {
+        if (ownerOf(tokenId) != msg.sender) {
+            revert NotOwnerOfToken(tokenId);
         }
         _;
     }
@@ -69,6 +77,8 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         payable
         onlyReadyToBreed(fatherId)
         onlyReadyToBreed(motherId)
+        onlyOwnerOf(fatherId)
+        onlyOwnerOf(motherId)
     {
         if (msg.value != breedingFeeInWei) {
             revert InsufficentFeeAmount(breedingFeeInWei);
