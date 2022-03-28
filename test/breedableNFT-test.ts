@@ -35,6 +35,7 @@ describe("BreedableNFT", function () {
     expect(creature.genes).to.eq(genes);
   });
 
+  // TODO Test that the fee is deposited on the escrow smart contract
   it("Breeds a new creature if both parents exist, can breed and the breeding fee is supplied", async () => {
     const breedableNFT: BreedableNFT = await deployBreedableNFT(name, symbol, breedingFee) as BreedableNFT;
     const [father, mother] = await mintPromoMany(breedableNFT, [123, 456]);
