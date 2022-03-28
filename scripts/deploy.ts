@@ -1,7 +1,7 @@
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
-async function deployBreedableNFT(name: string, symbol: string, breedingFeeInWei: BigNumber): Promise<Contract> {
+export async function deployBreedableNFT(name: string, symbol: string, breedingFeeInWei: BigNumber): Promise<Contract> {
     const BreedableNFT = await ethers.getContractFactory("BreedableNFT");
     const breedableNFT = await BreedableNFT.deploy(name, symbol, breedingFeeInWei);
     await breedableNFT.deployed();
