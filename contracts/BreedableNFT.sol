@@ -13,7 +13,6 @@ struct Creature {
 }
 
 contract BreedableNFT is ERC721, Ownable, PullPayment {
-    uint256 latestTokenId;
     Creature[] creaturesByIdMinusOne;
     uint256 breedingFeeInWei;
 
@@ -64,17 +63,6 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         emit PromoCreatureMinted(tokenId);
     }
 
-    function mint(uint256 genes, address to) private returns (Creature memory) {
-        uint256 tokenId = ++latestTokenId;
-        _safeMint(to, tokenId);
-        creaturesByIdMinusOne[tokenId] = Creature({
-            tokenId: tokenId,
-            genes: genes,
-            breedingBlockedUntil: 0
-        });
-        return creaturesByIdMinusOne[tokenId];
-    }
-
     function breed(uint256 fatherId, uint256 motherId)
         public
         payable
@@ -102,4 +90,16 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         // TODO: Implement actual gene algo
         return (fatherGenes + motherGenes) % 9;
     }
+
+    function mint(uint256 genes, address to) private returns (Creature memory) {
+        uint256 tokenId = creaturesByIdMinusOne.length + 1;
+        _safeMint(to, tokenId);
+        creaturesByIdMinusOne.push(Creature({
+            tokenId: tokenId,
+            genes: genes,
+            breedingBlockedUntil: 0
+        }));
+        return getCreature(tokenId);
+    }
+
 }
