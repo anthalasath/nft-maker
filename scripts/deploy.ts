@@ -1,15 +1,38 @@
-import { BigNumber, Contract } from "ethers";
+import { BigNumber, BigNumberish, Contract } from "ethers";
 import { ethers } from "hardhat";
 
-export async function deployBreedableNFT(name: string, symbol: string, breedingFeeInWei: BigNumber): Promise<Contract> {
+export interface BreedableNFTConstructorArgs {
+    name: string
+    symbol: string
+    breedingFeeInWei: BigNumber
+    fatherGeneChance: BigNumberish
+    motherGeneChance: BigNumberish
+    genotypeSize: BigNumberish
+}
+
+export async function deployBreedableNFT(args: BreedableNFTConstructorArgs): Promise<Contract> {
     const BreedableNFT = await ethers.getContractFactory("BreedableNFT");
-    const breedableNFT = await BreedableNFT.deploy(name, symbol, breedingFeeInWei);
+    const breedableNFT = await BreedableNFT.deploy(
+        args.name,
+        args.symbol,
+        args.breedingFeeInWei,
+        args.fatherGeneChance,
+        args.motherGeneChance,
+        args.genotypeSize
+    );
     await breedableNFT.deployed();
     return breedableNFT;
 }
 
 async function main(): Promise<void> {
-    const breedableNFT = await deployBreedableNFT("Gremlin", "GREM", ethers.utils.parseEther("1"));
+    const breedableNFT = await deployBreedableNFT({
+        name: "Gremlin",
+        symbol: "GREM",
+        breedingFeeInWei: ethers.utils.parseEther("1"),
+        fatherGeneChance: 45,
+        motherGeneChance: 45,
+        genotypeSize: 3
+    });
     console.log(`Deployed BreedableNFT at ${breedableNFT.address}`);
 }
 

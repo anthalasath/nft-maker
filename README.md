@@ -6,11 +6,11 @@ Right now, breedable nfts (like cryptokitties) are planned for the MVP.
 ## TODO:
 
 ### high prio:
-- Genes representation / Genetic algo
 - Pic generation
 - UI
 
 ### low prio
+- Use VRF to make rolls random
 - allow configuration of breeding CD
 - Test unhappy paths and reverts
 
