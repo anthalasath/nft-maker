@@ -6,7 +6,7 @@ Right now, breedable nfts (like cryptokitties) are planned for the MVP.
 ## TODO:
 
 ### high prio:
-- Pic generation (check: https://github.com/lovell/sharp)
+- Pic generation (check: https://github.com/lovell/sharp for how to do it: https://github.com/lovell/sharp/issues/405#issuecomment-208033263)
 - UI
 
 ### low prio
