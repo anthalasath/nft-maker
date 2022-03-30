@@ -33,9 +33,6 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
     uint256 breedingFeeInWei;
     uint256 fatherGeneChance;
     uint256 motherGeneChance;
-    
-    // TODO Use categories length instead
-    uint256 private genotypeSize;
 
     Category[] categories;
 
@@ -76,17 +73,17 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         uint256 _breedingFeeInWei,
         uint256 _fatherGeneChance,
         uint256 _motherGeneChance,
-        uint256 _genotypeSize,
         Category[] memory _categories
     ) ERC721(name, symbol) {
         if ((_fatherGeneChance + _motherGeneChance) > 100) {
             revert Exceeds100Percent(_fatherGeneChance, _motherGeneChance);
         }
         breedingFeeInWei = _breedingFeeInWei;
-        genotypeSize = _genotypeSize;
         fatherGeneChance = _fatherGeneChance;
         motherGeneChance = _motherGeneChance;
-        categories = _categories;
+        for (uint256 i = 0; i < _categories.length; i++) {
+            categories[i] = _categories[i];
+        }
     }
 
     function getPicture(uint256 layer, uint256 gene)
@@ -134,7 +131,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         Creature memory father = getCreature(fatherId);
         Creature memory mother = getCreature(motherId);
         // TODO: Random words
-        uint256[] memory randomWords = new uint256[](genotypeSize);
+        uint256[] memory randomWords = new uint256[](categories.length);
         for (uint256 i = 0; i < randomWords.length; i++) {
             randomWords[i] = i;
         }
@@ -155,7 +152,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         uint256[] memory motherGenes,
         uint256[] memory randomWords
     ) private view returns (uint256[] memory) {
-        uint256[] memory childGenes = new uint256[](genotypeSize);
+        uint256[] memory childGenes = new uint256[](categories.length);
         for (uint256 i = 0; i < childGenes.length; i++) {
             childGenes[i] = generateChildGene(
                 fatherGenes[i],

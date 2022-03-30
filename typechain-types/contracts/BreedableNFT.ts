@@ -27,6 +27,25 @@ import type {
   OnEvent,
 } from "../common";
 
+export type Vector2Struct = { x: BigNumberish; y: BigNumberish };
+
+export type Vector2StructOutput = [BigNumber, BigNumber] & {
+  x: BigNumber;
+  y: BigNumber;
+};
+
+export type CategoryStruct = {
+  name: string;
+  position: Vector2Struct;
+  picturesUris: string[];
+};
+
+export type CategoryStructOutput = [string, Vector2StructOutput, string[]] & {
+  name: string;
+  position: Vector2StructOutput;
+  picturesUris: string[];
+};
+
 export type CreatureStruct = {
   tokenId: BigNumberish;
   genes: BigNumberish[];
@@ -39,6 +58,13 @@ export type CreatureStructOutput = [BigNumber, BigNumber[], BigNumber] & {
   breedingBlockedUntil: BigNumber;
 };
 
+export type PictureStruct = { position: Vector2Struct; uri: string };
+
+export type PictureStructOutput = [Vector2StructOutput, string] & {
+  position: Vector2StructOutput;
+  uri: string;
+};
+
 export interface BreedableNFTInterface extends utils.Interface {
   functions: {
     "approve(address,uint256)": FunctionFragment;
@@ -47,6 +73,7 @@ export interface BreedableNFTInterface extends utils.Interface {
     "getApproved(uint256)": FunctionFragment;
     "getBreedingFee()": FunctionFragment;
     "getCreature(uint256)": FunctionFragment;
+    "getPicture(uint256,uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "mintPromo(uint256[])": FunctionFragment;
     "name()": FunctionFragment;
@@ -73,6 +100,7 @@ export interface BreedableNFTInterface extends utils.Interface {
       | "getApproved"
       | "getBreedingFee"
       | "getCreature"
+      | "getPicture"
       | "isApprovedForAll"
       | "mintPromo"
       | "name"
@@ -111,6 +139,10 @@ export interface BreedableNFTInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getCreature",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPicture",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -180,6 +212,7 @@ export interface BreedableNFTInterface extends utils.Interface {
     functionFragment: "getCreature",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getPicture", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
     data: BytesLike
@@ -365,6 +398,12 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[CreatureStructOutput]>;
 
+    getPicture(
+      layer: BigNumberish,
+      gene: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[PictureStructOutput]>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -468,6 +507,12 @@ export interface BreedableNFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<CreatureStructOutput>;
 
+  getPicture(
+    layer: BigNumberish,
+    gene: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<PictureStructOutput>;
+
   isApprovedForAll(
     owner: string,
     operator: string,
@@ -564,6 +609,12 @@ export interface BreedableNFT extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<CreatureStructOutput>;
+
+    getPicture(
+      layer: BigNumberish,
+      gene: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PictureStructOutput>;
 
     isApprovedForAll(
       owner: string,
@@ -715,6 +766,12 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getPicture(
+      layer: BigNumberish,
+      gene: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -819,6 +876,12 @@ export interface BreedableNFT extends BaseContract {
 
     getCreature(
       tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getPicture(
+      layer: BigNumberish,
+      gene: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
