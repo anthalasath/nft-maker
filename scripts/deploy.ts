@@ -1,7 +1,7 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { ethers } from "hardhat";
-import { CategoryStruct } from "../typechain-types/contracts/BreedableNFT";
-import { newEmptyCategory } from "./utils";
+import { PicturePartCategoryStruct } from "../typechain-types/contracts/BreedableNFT";
+import { newDummyPicturePartCategory } from "./utils";
 
 export interface BreedableNFTConstructorArgs {
     name: string
@@ -9,7 +9,7 @@ export interface BreedableNFTConstructorArgs {
     breedingFeeInWei: BigNumber
     fatherGeneChance: BigNumberish
     motherGeneChance: BigNumberish
-    categories: CategoryStruct[]
+    picturePartCategories: PicturePartCategoryStruct[]
 }
 
 export async function deployBreedableNFT(args: BreedableNFTConstructorArgs): Promise<Contract> {
@@ -20,7 +20,7 @@ export async function deployBreedableNFT(args: BreedableNFTConstructorArgs): Pro
         args.breedingFeeInWei,
         args.fatherGeneChance,
         args.motherGeneChance,
-        args.categories
+        args.picturePartCategories
     );
     await breedableNFT.deployed();
     return breedableNFT;
@@ -33,7 +33,7 @@ async function main(): Promise<void> {
         breedingFeeInWei: ethers.utils.parseEther("1"),
         fatherGeneChance: 45,
         motherGeneChance: 45,
-        categories: ["Head", "Hat", "Eyes"].map(newEmptyCategory)
+        picturePartCategories: ["Head", "Hat", "Eyes"].map(newDummyPicturePartCategory)
     });
     console.log(`Deployed BreedableNFT at ${breedableNFT.address}`);
 }

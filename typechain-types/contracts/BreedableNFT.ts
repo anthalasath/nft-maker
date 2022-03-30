@@ -34,17 +34,17 @@ export type Vector2StructOutput = [BigNumber, BigNumber] & {
   y: BigNumber;
 };
 
-export type CategoryStruct = {
+export type PicturePartCategoryStruct = {
   name: string;
   position: Vector2Struct;
   picturesUris: string[];
 };
 
-export type CategoryStructOutput = [string, Vector2StructOutput, string[]] & {
-  name: string;
-  position: Vector2StructOutput;
-  picturesUris: string[];
-};
+export type PicturePartCategoryStructOutput = [
+  string,
+  Vector2StructOutput,
+  string[]
+] & { name: string; position: Vector2StructOutput; picturesUris: string[] };
 
 export type CreatureStruct = {
   tokenId: BigNumberish;

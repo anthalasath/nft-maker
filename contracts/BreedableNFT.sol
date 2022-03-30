@@ -22,7 +22,7 @@ struct Picture {
     string uri;
 }
 
-struct Category {
+struct PicturePartCategory {
     string name;
     Vector2 position;
     string[] picturesUris;
@@ -34,7 +34,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
     uint256 fatherGeneChance;
     uint256 motherGeneChance;
 
-    Category[] categories;
+    PicturePartCategory[] picturePartCategories;
 
     event BredByBirth(
         uint256 indexed fatherId,
@@ -74,7 +74,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         uint256 _breedingFeeInWei,
         uint256 _fatherGeneChance,
         uint256 _motherGeneChance,
-        Category[] memory _categories
+        PicturePartCategory[] memory _categories
     ) ERC721(name, symbol) {
         if ((_fatherGeneChance + _motherGeneChance) > 100) {
             revert Exceeds100Percent(_fatherGeneChance, _motherGeneChance);
@@ -86,7 +86,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
             if (_categories[i].picturesUris.length == 0) {
                 revert EmptyCategoryPicturesUris(i);
             }
-            categories.push(_categories[i]);
+            picturePartCategories.push(_categories[i]);
         }
     }
 
@@ -95,10 +95,10 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         view
         returns (Picture memory)
     {
-        uint256 len = categories[layer].picturesUris.length;
+        uint256 len = picturePartCategories[layer].picturesUris.length;
         uint256 index = gene % len;
-        string memory uri = categories[layer].picturesUris[index];
-        return Picture({position: categories[layer].position, uri: uri});
+        string memory uri = picturePartCategories[layer].picturesUris[index];
+        return Picture({position: picturePartCategories[layer].position, uri: uri});
     }
 
     function getBreedingFee() public view returns (uint256) {
@@ -135,7 +135,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         Creature memory father = getCreature(fatherId);
         Creature memory mother = getCreature(motherId);
         // TODO: Random words
-        uint256[] memory randomWords = new uint256[](categories.length);
+        uint256[] memory randomWords = new uint256[](picturePartCategories.length);
         for (uint256 i = 0; i < randomWords.length; i++) {
             randomWords[i] = i;
         }
@@ -156,7 +156,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         uint256[] memory motherGenes,
         uint256[] memory randomWords
     ) private view returns (uint256[] memory) {
-        uint256[] memory childGenes = new uint256[](categories.length);
+        uint256[] memory childGenes = new uint256[](picturePartCategories.length);
         for (uint256 i = 0; i < childGenes.length; i++) {
             childGenes[i] = generateChildGene(
                 fatherGenes[i],

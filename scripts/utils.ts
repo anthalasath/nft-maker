@@ -1,4 +1,4 @@
-import { CategoryStruct, Vector2Struct } from "../typechain-types/contracts/BreedableNFT";
+import { PicturePartCategoryStruct, Vector2Struct } from "../typechain-types/contracts/BreedableNFT";
 
 export function getEvent(events: any[] | undefined, eventName: string): any | null {
     if (!events) {
@@ -14,7 +14,7 @@ export function getEvent(events: any[] | undefined, eventName: string): any | nu
     }
 }
 
-export function newEmptyCategory(name: string): CategoryStruct {
+export function newDummyPicturePartCategory(name: string): PicturePartCategoryStruct {
     return { name, position: newZeroVector2D(), picturesUris: newDummyPicturesUris() }
 }
 
