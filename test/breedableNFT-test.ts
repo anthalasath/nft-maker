@@ -3,7 +3,7 @@ import { BigNumber, BigNumberish } from "ethers";
 import { getCreate2Address } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { deployBreedableNFT } from "../scripts/deploy";
-import { getEvent } from "../scripts/utils";
+import { getEvent, newEmptyCategory } from "../scripts/utils";
 import { BredByBirthEvent, BreedableNFT, CreatureStructOutput, PromoCreatureMintedEvent } from "../typechain-types/contracts/BreedableNFT";
 
 describe("BreedableNFT", function () {
@@ -13,9 +13,10 @@ describe("BreedableNFT", function () {
   const fatherGeneChance = 45;
   const motherGeneChance = 45;
   const genotypeSize = 3;
+  const categories = ["Head", "Hat", "Eyes"].map(newEmptyCategory);
   
   async function deploy(): Promise<BreedableNFT> {
-    return await deployBreedableNFT({name, symbol, breedingFeeInWei, fatherGeneChance, motherGeneChance, genotypeSize}) as BreedableNFT
+    return await deployBreedableNFT({name, symbol, breedingFeeInWei, fatherGeneChance, motherGeneChance, categories}) as BreedableNFT
   }
 
   it("Should be deployed with the correct name, symbol and breeding fee", async () => {

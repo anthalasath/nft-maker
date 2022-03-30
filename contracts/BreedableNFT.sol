@@ -48,6 +48,7 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
     error InsufficentFeeAmount(uint256 feeInWei);
     error NotOwnerOfToken(uint256 tokenId);
     error Exceeds100Percent(uint256 fatherChance, uint256 motherChance);
+    error EmptyCategoryPicturesUris(uint256 layer);
 
     modifier onlyReadyToBreed(uint256 tokenId) {
         if (!_exists(tokenId)) {
@@ -82,7 +83,10 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         fatherGeneChance = _fatherGeneChance;
         motherGeneChance = _motherGeneChance;
         for (uint256 i = 0; i < _categories.length; i++) {
-            categories[i] = _categories[i];
+            if (_categories[i].picturesUris.length == 0) {
+                revert EmptyCategoryPicturesUris(i);
+            }
+            categories.push(_categories[i]);
         }
     }
 
