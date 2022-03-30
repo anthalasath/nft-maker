@@ -12,12 +12,30 @@ struct Creature {
     uint256 breedingBlockedUntil;
 }
 
+struct Vector2 {
+    uint256 x;
+    uint256 y;
+}
+
+struct Picture {
+    Vector2 position;
+    string uri;
+}
+
+struct Category {
+    string name;
+    Vector2 position;
+    string[] picturesUris;
+}
+
 contract BreedableNFT is ERC721, Ownable, PullPayment {
     Creature[] creaturesByIdMinusOne;
     uint256 breedingFeeInWei;
     uint256 fatherGeneChance;
     uint256 motherGeneChance;
     uint256 private genotypeSize;
+
+    Category[] categories;
 
     event BredByBirth(
         uint256 indexed fatherId,
@@ -56,7 +74,8 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         uint256 _breedingFeeInWei,
         uint256 _fatherGeneChance,
         uint256 _motherGeneChance,
-        uint256 _genotypeSize
+        uint256 _genotypeSize,
+        Category[] memory _categories
     ) ERC721(name, symbol) {
         if ((_fatherGeneChance + _motherGeneChance) > 100) {
             revert Exceeds100Percent(_fatherGeneChance, _motherGeneChance);
@@ -65,6 +84,18 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         genotypeSize = _genotypeSize;
         fatherGeneChance = _fatherGeneChance;
         motherGeneChance = _motherGeneChance;
+        categories = _categories;
+    }
+
+    function getPicture(uint256 layer, uint256 gene)
+        public
+        view
+        returns (Picture memory)
+    {
+        uint256 len = categories[layer].picturesUris.length;
+        uint256 index = gene % len;
+        string memory uri = categories[layer].picturesUris[index];
+        return Picture({position: categories[layer].position, uri: uri});
     }
 
     function getBreedingFee() public view returns (uint256) {
@@ -105,7 +136,11 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         for (uint256 i = 0; i < randomWords.length; i++) {
             randomWords[i] = i;
         }
-        uint256[] memory childGenes = getChildGenes(father.genes, mother.genes, randomWords);
+        uint256[] memory childGenes = getChildGenes(
+            father.genes,
+            mother.genes,
+            randomWords
+        );
         // TODO: Allow custom option to sometimes give twins ?
         uint256 childId = mint(childGenes, msg.sender).tokenId;
         emit BredByBirth(fatherId, motherId, childId);
@@ -145,7 +180,10 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         }
     }
 
-    function mint(uint256[] memory genes, address to) private returns (Creature memory) {
+    function mint(uint256[] memory genes, address to)
+        private
+        returns (Creature memory)
+    {
         uint256 tokenId = creaturesByIdMinusOne.length + 1;
         _safeMint(to, tokenId);
         creaturesByIdMinusOne.push(

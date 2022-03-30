@@ -18,7 +18,8 @@ export async function deployBreedableNFT(args: BreedableNFTConstructorArgs): Pro
         args.breedingFeeInWei,
         args.fatherGeneChance,
         args.motherGeneChance,
-        args.genotypeSize
+        args.genotypeSize,
+        []
     );
     await breedableNFT.deployed();
     return breedableNFT;
