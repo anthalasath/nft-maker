@@ -33,6 +33,8 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
     uint256 breedingFeeInWei;
     uint256 fatherGeneChance;
     uint256 motherGeneChance;
+    
+    // TODO Use categories length instead
     uint256 private genotypeSize;
 
     Category[] categories;
