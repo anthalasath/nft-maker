@@ -23,5 +23,9 @@ export function newZeroVector2D(): Vector2Struct {
 }
 
 export function newDummyPicturesUris() {
-    return ["hello", "world", "hi"];
+    return [
+        "https://mpng.subpng.com/20180613/ebg/kisspng-sacred-geometry-geometric-shape-tetrahedral-molecular-geometry-5b21123c8153b4.3813644815288940125297.jpg",
+        "https://p1.hiclipart.com/preview/568/552/919/geometric-shape-background-triangle-geometry-pyramid-line-minimalism-centre-polygon-png-clipart.jpg",
+        "https://flyclipart.com/thumb2/abstract-geometric-shape-set-of-icons-icons-for-free-807110.png"
+    ];
 }
