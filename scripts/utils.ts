@@ -16,11 +16,15 @@ export function getEvent(events: any[] | undefined, eventName: string): any | nu
 }
 
 export function newDummyPicturePartCategory(name: string): PicturePartCategoryStruct {
-    return { name, position: newZeroVector2D(), picturesUris: newDummyPicturesUris() }
+    return { name, position: randomVector2(1920, 1080), picturesUris: newDummyPicturesUris() }
 }
 
-export function newZeroVector2D(): Vector2Struct {
-    return { x: 0, y: 0 };
+export function randomVector2(maxW: number, maxH: number): Vector2Struct {
+    return { x: randomInteger(maxW), y: randomInteger(maxH) };
+}
+
+export function randomInteger(maxValue: number) {
+    return Math.round(Math.random() * maxValue);
 }
 
 export function newDummyPicturesUris() {
