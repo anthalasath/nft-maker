@@ -1,4 +1,5 @@
-import { PicturePartCategoryStruct, Vector2Struct } from "../typechain-types/contracts/BreedableNFT";
+import { BigNumberish } from "ethers";
+import { BreedableNFT, CreatureStruct, PicturePartCategoryStruct, PromoCreatureMintedEvent, Vector2Struct } from "../typechain-types/contracts/BreedableNFT";
 
 export function getEvent(events: any[] | undefined, eventName: string): any | null {
     if (!events) {
@@ -29,3 +30,10 @@ export function newDummyPicturesUris() {
         "https://flyclipart.com/thumb2/abstract-geometric-shape-set-of-icons-icons-for-free-807110.png"
     ];
 }
+
+export async function mintPromo(breedableNFT: BreedableNFT, genes: BigNumberish[]): Promise<CreatureStruct> {
+    const tx = await breedableNFT.mintPromo(genes);
+    const receipt = await tx.wait();
+    const event: PromoCreatureMintedEvent = getEvent(receipt.events, "PromoCreatureMinted");
+    return breedableNFT.getCreature(event.args.tokenId);
+  }

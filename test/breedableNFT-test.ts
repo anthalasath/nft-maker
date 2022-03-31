@@ -3,8 +3,8 @@ import { BigNumber, BigNumberish } from "ethers";
 import { getCreate2Address } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { deployBreedableNFT } from "../scripts/deploy";
-import { getEvent, newDummyPicturePartCategory } from "../scripts/utils";
-import { BredByBirthEvent, BreedableNFT, CreatureStructOutput, PromoCreatureMintedEvent } from "../typechain-types/contracts/BreedableNFT";
+import { getEvent, mintPromo, newDummyPicturePartCategory } from "../scripts/utils";
+import { BredByBirthEvent, BreedableNFT, CreatureStruct, CreatureStructOutput, PromoCreatureMintedEvent } from "../typechain-types/contracts/BreedableNFT";
 
 describe("BreedableNFT", function () {
   const name = "Gremlins";
@@ -62,13 +62,7 @@ describe("BreedableNFT", function () {
   });
 });
 
-async function mintPromoMany(breedableNFT: BreedableNFT, genes: BigNumberish[][]): Promise<CreatureStructOutput[]> {
+async function mintPromoMany(breedableNFT: BreedableNFT, genes: BigNumberish[][]): Promise<CreatureStruct[]> {
   return Promise.all(genes.map(g => mintPromo(breedableNFT, g)));
 }
 
-async function mintPromo(breedableNFT: BreedableNFT, genes: BigNumberish[]): Promise<CreatureStructOutput> {
-  const tx = await breedableNFT.mintPromo(genes);
-  const receipt = await tx.wait();
-  const event: PromoCreatureMintedEvent = getEvent(receipt.events, "PromoCreatureMinted");
-  return breedableNFT.getCreature(event.args.tokenId);
-}
