@@ -74,6 +74,8 @@ export interface BreedableNFTInterface extends utils.Interface {
     "getBreedingFee()": FunctionFragment;
     "getCreature(uint256)": FunctionFragment;
     "getPicture(uint256,uint256)": FunctionFragment;
+    "getPicturePartCategoriesCount()": FunctionFragment;
+    "getPicturePartCategory(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "mintPromo(uint256[])": FunctionFragment;
     "name()": FunctionFragment;
@@ -101,6 +103,8 @@ export interface BreedableNFTInterface extends utils.Interface {
       | "getBreedingFee"
       | "getCreature"
       | "getPicture"
+      | "getPicturePartCategoriesCount"
+      | "getPicturePartCategory"
       | "isApprovedForAll"
       | "mintPromo"
       | "name"
@@ -143,6 +147,14 @@ export interface BreedableNFTInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getPicture",
     values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPicturePartCategoriesCount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPicturePartCategory",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -213,6 +225,14 @@ export interface BreedableNFTInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getPicture", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getPicturePartCategoriesCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getPicturePartCategory",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
     data: BytesLike
@@ -404,6 +424,15 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[PictureStructOutput]>;
 
+    getPicturePartCategoriesCount(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    getPicturePartCategory(
+      layer: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[PicturePartCategoryStructOutput]>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -513,6 +542,13 @@ export interface BreedableNFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<PictureStructOutput>;
 
+  getPicturePartCategoriesCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getPicturePartCategory(
+    layer: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<PicturePartCategoryStructOutput>;
+
   isApprovedForAll(
     owner: string,
     operator: string,
@@ -615,6 +651,15 @@ export interface BreedableNFT extends BaseContract {
       gene: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PictureStructOutput>;
+
+    getPicturePartCategoriesCount(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getPicturePartCategory(
+      layer: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PicturePartCategoryStructOutput>;
 
     isApprovedForAll(
       owner: string,
@@ -772,6 +817,15 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getPicturePartCategoriesCount(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getPicturePartCategory(
+      layer: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -882,6 +936,15 @@ export interface BreedableNFT extends BaseContract {
     getPicture(
       layer: BigNumberish,
       gene: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getPicturePartCategoriesCount(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getPicturePartCategory(
+      layer: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

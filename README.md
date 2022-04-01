@@ -6,12 +6,12 @@ Right now, breedable nfts (like cryptokitties) are planned for the MVP.
 ## TODO:
 
 ### high prio:
-- UI
-
-### low prio
 - Use VRF to make rolls random
+- 
+### low prio
 - allow configuration of breeding CD
 - Test unhappy paths and reverts
+- Gas efficiency ? Do we need to store the picture part categories on an IPFS file and jus thave a link to it for the assembler ?
 
 
 

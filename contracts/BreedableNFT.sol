@@ -101,6 +101,14 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         return Picture({position: picturePartCategories[layer].position, uri: uri});
     }
 
+    function getPicturePartCategory(uint256 layer) public view returns (PicturePartCategory memory) {
+        return picturePartCategories[layer];
+    }
+
+    function getPicturePartCategoriesCount() public view returns (uint256) {
+        return picturePartCategories.length;
+    }
+
     function getBreedingFee() public view returns (uint256) {
         return breedingFeeInWei;
     }
