@@ -8,4 +8,4 @@ typechain
 cache
 artifacts/build-info/
 artifacts/@openzeppelin/
-artifacts/contracts/BreedableNFT.dbg.json
+artifacts/contracts/BreedableNFT/BreedableNFT.dbg.json
