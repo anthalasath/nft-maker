@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, Contract } from "ethers";
+import { BigNumber, BigNumberish, Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
 import { BreedableNFTDeployedEvent, BreedableNFTDeployer } from "../typechain-types/contracts/BreedableNFTDeployer";
 import { BreedableNFT, BreedableNFTConstructorArgsStruct } from "../typechain-types/contracts/BreedableNFT";
@@ -6,8 +6,8 @@ import { Breeder } from "../typechain-types/contracts/Breeder";
 import { getEvent, newDummyPicturePartCategory } from "./utils";
 import BreedableNFTArtifact from "../artifacts/contracts/BreedableNFT.sol/BreedableNFT.json";
 
-export async function deployBreedableNFTDeployer(): Promise<BreedableNFTDeployer> {
-    const BreedableNFTDeployer = await ethers.getContractFactory("BreedableNFTDeployer");
+export async function deployBreedableNFTDeployer(signer?: Signer): Promise<BreedableNFTDeployer> {
+    const BreedableNFTDeployer = await ethers.getContractFactory("BreedableNFTDeployer", signer);
     const breedableNFTDeployer = await BreedableNFTDeployer.deploy() as BreedableNFTDeployer;
     await breedableNFTDeployer.deployed();
     return breedableNFTDeployer;
