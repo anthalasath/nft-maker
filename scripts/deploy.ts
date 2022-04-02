@@ -1,13 +1,23 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { BreedableNFTDeployedEvent, BreedableNFTDeployer } from "../typechain-types/contracts/BreedableNFTDeployer";
 import { BreedableNFT, BreedableNFTConstructorArgsStruct } from "../typechain-types/contracts/BreedableNFT";
 import { Breeder } from "../typechain-types/contracts/Breeder";
-import { newDummyPicturePartCategory } from "./utils";
+import { getEvent, newDummyPicturePartCategory } from "./utils";
+import BreedableNFTArtifact from "../artifacts/contracts/BreedableNFT.sol/BreedableNFT.json";
 
-export async function deployBreedableNFT(args: BreedableNFTConstructorArgsStruct): Promise<BreedableNFT> {
-    const BreedableNFT = await ethers.getContractFactory("BreedableNFT");
-    const breedableNFT = await BreedableNFT.deploy(args) as BreedableNFT;
-    await breedableNFT.deployed();
+export async function deployBreedableNFTDeployer(): Promise<BreedableNFTDeployer> {
+    const BreedableNFTDeployer = await ethers.getContractFactory("BreedableNFTDeployer");
+    const breedableNFTDeployer = await BreedableNFTDeployer.deploy() as BreedableNFTDeployer;
+    await breedableNFTDeployer.deployed();
+    return breedableNFTDeployer;
+}
+
+export async function deployBreedableNFT(deployer: BreedableNFTDeployer, args: BreedableNFTConstructorArgsStruct): Promise<BreedableNFT> {
+    const tx = await deployer.deploy(args);
+    const receipt = await tx.wait();
+    const event = getEvent(receipt.events, "BreedableNFTDeployed") as BreedableNFTDeployedEvent;
+    const breedableNFT = await ethers.getContractAt(BreedableNFTArtifact.abi, event.args.contractAddress, deployer.signer) as BreedableNFT;
     return breedableNFT;
 }
 
@@ -18,9 +28,11 @@ export async function deployBreeder(): Promise<Breeder> {
     return breeder;
 }
 
-export async function deploySampleBreedableNFT(): Promise<{ breedableNFT: BreedableNFT, breeder: Breeder }> {
+export async function deploySampleBreedableNFT(): Promise<{ breedableNFT: BreedableNFT, breeder: Breeder, deployer: BreedableNFTDeployer }> {
     const breeder = await deployBreeder();
-    const breedableNFT = await deployBreedableNFT({
+    const deployer = await deployBreedableNFTDeployer();
+    const breedableNFT = await deployBreedableNFT(deployer, {
+        owner: await deployer.signer.getAddress(),
         name: "Gremlin",
         symbol: "GREM",
         breedingFeeInWei: ethers.utils.parseEther("1"),
@@ -29,7 +41,7 @@ export async function deploySampleBreedableNFT(): Promise<{ breedableNFT: Breeda
         categories: ["Head", "Hat", "Eyes"].map(newDummyPicturePartCategory),
         breederContractAddress: breeder.address
     });
-    return { breedableNFT, breeder };
+    return { breedableNFT, breeder, deployer };
 }
 
 async function main(): Promise<void> {

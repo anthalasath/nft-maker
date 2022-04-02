@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { deployBreedableNFT, deployBreeder } from "../scripts/deploy";
+import { deployBreedableNFT, deployBreedableNFTDeployer, deployBreeder } from "../scripts/deploy";
 import { getEvent, newDummyPicturePartCategory } from "../scripts/utils";
 import { BreedableNFT, PromoCreatureMintedEvent } from "../typechain-types/contracts/BreedableNFT";
 
@@ -14,8 +14,10 @@ describe("BreedableNFT", function () {
   const picturePartCategories = ["Head", "Hat", "Eyes"].map(newDummyPicturePartCategory);
 
   async function deploy(): Promise<BreedableNFT> {
+    const deployer = await deployBreedableNFTDeployer();
     const breeder = await deployBreeder();
-    return await deployBreedableNFT({
+    return await deployBreedableNFT(deployer, {
+      owner: await deployer.signer.getAddress(),
       name,
       symbol,
       breedingFeeInWei,

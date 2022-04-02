@@ -30,6 +30,7 @@ struct PicturePartCategory {
 }
 
 struct BreedableNFTConstructorArgs {
+    address owner;
     string name;
     string symbol;
     uint256 breedingFeeInWei;
@@ -90,6 +91,8 @@ contract BreedableNFT is ERC721, Ownable {
             }
             picturePartCategories.push(args.categories[i]);
         }
+
+        _transferOwnership(args.owner);
     }
 
     function getBreedingFee() public view returns (uint256) {

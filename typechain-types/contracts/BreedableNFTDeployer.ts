@@ -46,6 +46,7 @@ export type PicturePartCategoryStructOutput = [
 ] & { name: string; position: Vector2StructOutput; picturesUris: string[] };
 
 export type BreedableNFTConstructorArgsStruct = {
+  owner: string;
   name: string;
   symbol: string;
   breedingFeeInWei: BigNumberish;
@@ -58,12 +59,14 @@ export type BreedableNFTConstructorArgsStruct = {
 export type BreedableNFTConstructorArgsStructOutput = [
   string,
   string,
+  string,
   BigNumber,
   BigNumber,
   BigNumber,
   string,
   PicturePartCategoryStructOutput[]
 ] & {
+  owner: string;
   name: string;
   symbol: string;
   breedingFeeInWei: BigNumber;
@@ -75,7 +78,7 @@ export type BreedableNFTConstructorArgsStructOutput = [
 
 export interface BreedableNFTDeployerInterface extends utils.Interface {
   functions: {
-    "deploy((string,string,uint256,uint256,uint256,address,(string,(uint256,uint256),string[])[]))": FunctionFragment;
+    "deploy((address,string,string,uint256,uint256,uint256,address,(string,(uint256,uint256),string[])[]))": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "deploy"): FunctionFragment;
