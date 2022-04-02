@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { deployBreedableNFT, deployBreedableNFTDeployer, deployBreeder } from "../scripts/deploy";
+import { deployBreedableNFTDeployer, deployBreeder } from "../scripts/deploy";
 import { getEvent, newDummyPicturePartCategory } from "../scripts/utils";
 import { BreedableNFT } from "../typechain-types/contracts/BreedableNFT";
 import { BreedableNFTDeployedEvent } from "../typechain-types/contracts/BreedableNFTDeployer";
