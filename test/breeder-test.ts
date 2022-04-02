@@ -23,7 +23,7 @@ describe("BreedableNFT", function () {
     expect(child.tokenId).to.eq(event.args.childId);
     expect(child.breedingBlockedUntil).to.eq(0);
     expect(child.fatherId).to.eq(father.tokenId);
-    expect(child.motherId).to.eq(father.motherId);
+    expect(child.motherId).to.eq(mother.tokenId);
   });
 });
 
