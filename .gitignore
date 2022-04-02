@@ -9,3 +9,6 @@ cache
 artifacts/build-info/
 artifacts/@openzeppelin/
 artifacts/contracts/BreedableNFT.sol/BreedableNFT.dbg.json
+artifacts/contracts/BreedableNFTDeployer.sol/BreedableNFTDeployer.dbg.json
+artifacts/contracts/Breeder.sol/Breeder.dbg.json
+artifacts/hardhat/
