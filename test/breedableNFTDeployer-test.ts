@@ -11,7 +11,6 @@ describe("BreedableNFTDeployer", function () {
         const breeder = await deployBreeder();
         const deployer = await deployBreedableNFTDeployer();
         const tx = await deployer.deploy({
-            owner: await deployer.signer.getAddress(),
             name: "Gremlin",
             symbol: "GREM",
             breedingFeeInWei: ethers.utils.parseEther("1"),
@@ -21,6 +20,7 @@ describe("BreedableNFTDeployer", function () {
             breederContractAddress: breeder.address
         });
         const receipt = await tx.wait();
+        console.log(receipt);
         const event = getEvent(receipt.events, "BreedableNFTDeployed") as BreedableNFTDeployedEvent;
         const breedableNFT = await ethers.getContractAt(BreedableNFTArtifact.abi, event.args.contractAddress, deployer.signer) as BreedableNFT;
 

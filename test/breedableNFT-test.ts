@@ -17,7 +17,6 @@ describe("BreedableNFT", function () {
     const deployer = await deployBreedableNFTDeployer();
     const breeder = await deployBreeder();
     return await deployBreedableNFT(deployer, {
-      owner: await deployer.signer.getAddress(),
       name,
       symbol,
       breedingFeeInWei,

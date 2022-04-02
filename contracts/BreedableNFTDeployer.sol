@@ -9,6 +9,8 @@ contract BreedableNFTDeployer {
     event BreedableNFTDeployed(address indexed contractAddress, address indexed deployer);
     
     function deploy(BreedableNFTConstructorArgs memory args) public {
-        emit BreedableNFTDeployed(address(new BreedableNFT(args)), msg.sender);
+        BreedableNFT breedableNFT = new BreedableNFT(args);
+        breedableNFT.transferOwnership(msg.sender);
+        emit BreedableNFTDeployed(address(breedableNFT), msg.sender);
     }
 }

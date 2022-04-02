@@ -32,7 +32,6 @@ export async function deploySampleBreedableNFT(): Promise<{ breedableNFT: Breeda
     const breeder = await deployBreeder();
     const deployer = await deployBreedableNFTDeployer();
     const breedableNFT = await deployBreedableNFT(deployer, {
-        owner: await deployer.signer.getAddress(),
         name: "Gremlin",
         symbol: "GREM",
         breedingFeeInWei: ethers.utils.parseEther("1"),

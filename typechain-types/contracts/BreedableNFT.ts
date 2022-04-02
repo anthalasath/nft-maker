@@ -46,7 +46,6 @@ export type PicturePartCategoryStructOutput = [
 ] & { name: string; position: Vector2StructOutput; picturesUris: string[] };
 
 export type BreedableNFTConstructorArgsStruct = {
-  owner: string;
   name: string;
   symbol: string;
   breedingFeeInWei: BigNumberish;
@@ -59,14 +58,12 @@ export type BreedableNFTConstructorArgsStruct = {
 export type BreedableNFTConstructorArgsStructOutput = [
   string,
   string,
-  string,
   BigNumber,
   BigNumber,
   BigNumber,
   string,
   PicturePartCategoryStructOutput[]
 ] & {
-  owner: string;
   name: string;
   symbol: string;
   breedingFeeInWei: BigNumber;
