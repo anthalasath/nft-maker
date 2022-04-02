@@ -46,13 +46,13 @@ export type PicturePartCategoryStructOutput = [
 ] & { name: string; position: Vector2StructOutput; picturesUris: string[] };
 
 export type BreedableNFTConstructorArgsStruct = {
-  _name: string;
-  _symbol: string;
-  _breedingFeeInWei: BigNumberish;
-  _fatherGeneChance: BigNumberish;
-  _motherGeneChance: BigNumberish;
-  _breederContractAddress: string;
-  _categories: PicturePartCategoryStruct[];
+  name: string;
+  symbol: string;
+  breedingFeeInWei: BigNumberish;
+  fatherGeneChance: BigNumberish;
+  motherGeneChance: BigNumberish;
+  breederContractAddress: string;
+  categories: PicturePartCategoryStruct[];
 };
 
 export type BreedableNFTConstructorArgsStructOutput = [
@@ -64,13 +64,13 @@ export type BreedableNFTConstructorArgsStructOutput = [
   string,
   PicturePartCategoryStructOutput[]
 ] & {
-  _name: string;
-  _symbol: string;
-  _breedingFeeInWei: BigNumber;
-  _fatherGeneChance: BigNumber;
-  _motherGeneChance: BigNumber;
-  _breederContractAddress: string;
-  _categories: PicturePartCategoryStructOutput[];
+  name: string;
+  symbol: string;
+  breedingFeeInWei: BigNumber;
+  fatherGeneChance: BigNumber;
+  motherGeneChance: BigNumber;
+  breederContractAddress: string;
+  categories: PicturePartCategoryStructOutput[];
 };
 
 export interface BreedableNFTDeployerInterface extends utils.Interface {

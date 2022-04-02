@@ -32,13 +32,13 @@ struct PicturePartCategory {
 }
 
 struct BreedableNFTConstructorArgs {
-    string _name;
-    string _symbol;
-    uint256 _breedingFeeInWei;
-    uint256 _fatherGeneChance;
-    uint256 _motherGeneChance;
-    address _breederContractAddress;
-    PicturePartCategory[] _categories;
+    string name;
+    string symbol;
+    uint256 breedingFeeInWei;
+    uint256 fatherGeneChance;
+    uint256 motherGeneChance;
+    address breederContractAddress;
+    PicturePartCategory[] categories;
 }
 
 contract BreedableNFT is ERC721, Ownable {
@@ -49,6 +49,8 @@ contract BreedableNFT is ERC721, Ownable {
     uint256 breedingFeeInWei;
     uint256 fatherGeneChance;
     uint256 motherGeneChance;
+
+    event PromoCreatureMinted(uint256 tokenId);
 
     error CanOnlyBeCalledByBreeder();
     error Exceeds100Percent(uint256 fatherChance, uint256 motherChance);
@@ -70,20 +72,25 @@ contract BreedableNFT is ERC721, Ownable {
         _;
     }
 
-    constructor(BreedableNFTConstructorArgs memory args) ERC721(args._name, args._symbol) {
-        if ((args._fatherGeneChance + args._motherGeneChance) > 100) {
-            revert Exceeds100Percent(args._fatherGeneChance, args._motherGeneChance);
+    constructor(BreedableNFTConstructorArgs memory args)
+        ERC721(args.name, args.symbol)
+    {
+        if ((args.fatherGeneChance + args.motherGeneChance) > 100) {
+            revert Exceeds100Percent(
+                args.fatherGeneChance,
+                args.motherGeneChance
+            );
         }
-        breedingFeeInWei = args._breedingFeeInWei;
-        fatherGeneChance = args._fatherGeneChance;
-        motherGeneChance = args._motherGeneChance;
-        breeder = args._breederContractAddress;
+        breedingFeeInWei = args.breedingFeeInWei;
+        fatherGeneChance = args.fatherGeneChance;
+        motherGeneChance = args.motherGeneChance;
+        breeder = args.breederContractAddress;
 
-        for (uint256 i = 0; i < args._categories.length; i++) {
-            if (args._categories[i].picturesUris.length == 0) {
+        for (uint256 i = 0; i < args.categories.length; i++) {
+            if (args.categories[i].picturesUris.length == 0) {
                 revert EmptyCategoryPicturesUris(i);
             }
-            picturePartCategories.push(args._categories[i]);
+            picturePartCategories.push(args.categories[i]);
         }
     }
 
@@ -108,7 +115,10 @@ contract BreedableNFT is ERC721, Ownable {
             revert InexistentCreature(tokenId);
         }
         // TODO: ok to use block timestamp for CD ?
-        return getCreature(tokenId).breedingBlockedUntil > block.timestamp;
+        Creature memory creature = getCreature(tokenId);
+        return
+            creature.breedingBlockedUntil == 0 ||
+            creature.breedingBlockedUntil > block.timestamp;
     }
 
     function getPicture(uint256 layer, uint256 gene)
@@ -149,12 +159,9 @@ contract BreedableNFT is ERC721, Ownable {
         return creaturesByIdMinusOne[tokenId - 1];
     }
 
-    function mintPromo(uint256[] memory genes, address to)
-        public
-        onlyOwner
-        returns (Creature memory)
-    {
-        return _mint(genes, 0, 0, to);
+    function mintPromo(uint256[] memory genes, address to) public onlyOwner {
+        uint256 creatureTokenId = _mint(genes, 0, 0, to).tokenId;
+        emit PromoCreatureMinted(creatureTokenId);
     }
 
     function mintFromBirth(

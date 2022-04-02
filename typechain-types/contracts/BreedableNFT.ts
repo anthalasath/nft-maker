@@ -46,13 +46,13 @@ export type PicturePartCategoryStructOutput = [
 ] & { name: string; position: Vector2StructOutput; picturesUris: string[] };
 
 export type BreedableNFTConstructorArgsStruct = {
-  _name: string;
-  _symbol: string;
-  _breedingFeeInWei: BigNumberish;
-  _fatherGeneChance: BigNumberish;
-  _motherGeneChance: BigNumberish;
-  _breederContractAddress: string;
-  _categories: PicturePartCategoryStruct[];
+  name: string;
+  symbol: string;
+  breedingFeeInWei: BigNumberish;
+  fatherGeneChance: BigNumberish;
+  motherGeneChance: BigNumberish;
+  breederContractAddress: string;
+  categories: PicturePartCategoryStruct[];
 };
 
 export type BreedableNFTConstructorArgsStructOutput = [
@@ -64,13 +64,13 @@ export type BreedableNFTConstructorArgsStructOutput = [
   string,
   PicturePartCategoryStructOutput[]
 ] & {
-  _name: string;
-  _symbol: string;
-  _breedingFeeInWei: BigNumber;
-  _fatherGeneChance: BigNumber;
-  _motherGeneChance: BigNumber;
-  _breederContractAddress: string;
-  _categories: PicturePartCategoryStructOutput[];
+  name: string;
+  symbol: string;
+  breedingFeeInWei: BigNumber;
+  fatherGeneChance: BigNumber;
+  motherGeneChance: BigNumber;
+  breederContractAddress: string;
+  categories: PicturePartCategoryStructOutput[];
 };
 
 export type CreatureStruct = {
@@ -334,12 +334,14 @@ export interface BreedableNFTInterface extends utils.Interface {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "PromoCreatureMinted(uint256)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PromoCreatureMinted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
@@ -378,6 +380,17 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface PromoCreatureMintedEventObject {
+  tokenId: BigNumber;
+}
+export type PromoCreatureMintedEvent = TypedEvent<
+  [BigNumber],
+  PromoCreatureMintedEventObject
+>;
+
+export type PromoCreatureMintedEventFilter =
+  TypedEventFilter<PromoCreatureMintedEvent>;
 
 export interface TransferEventObject {
   from: string;
@@ -725,7 +738,7 @@ export interface BreedableNFT extends BaseContract {
       genes: BigNumberish[],
       to: string,
       overrides?: CallOverrides
-    ): Promise<CreatureStructOutput>;
+    ): Promise<void>;
 
     name(overrides?: CallOverrides): Promise<string>;
 
@@ -809,6 +822,11 @@ export interface BreedableNFT extends BaseContract {
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
+
+    "PromoCreatureMinted(uint256)"(
+      tokenId?: null
+    ): PromoCreatureMintedEventFilter;
+    PromoCreatureMinted(tokenId?: null): PromoCreatureMintedEventFilter;
 
     "Transfer(address,address,uint256)"(
       from?: string | null,

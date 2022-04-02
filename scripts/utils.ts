@@ -36,7 +36,7 @@ export function newDummyPicturesUris() {
 }
 
 export async function mintPromo(breedableNFT: BreedableNFT, genes: BigNumberish[]): Promise<CreatureStruct> {
-    const tx = await breedableNFT.mintPromo(genes);
+    const tx = await breedableNFT.mintPromo(genes, await breedableNFT.signer.getAddress());
     const receipt = await tx.wait();
     const event: PromoCreatureMintedEvent = getEvent(receipt.events, "PromoCreatureMinted");
     return breedableNFT.getCreature(event.args.tokenId);
