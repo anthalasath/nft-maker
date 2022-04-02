@@ -5,7 +5,7 @@ import { getEvent, mintPromo } from "../scripts/utils";
 import { BreedableNFT, CreatureStruct } from "../typechain-types/contracts/BreedableNFT";
 import { BredByBirthEvent } from "../typechain-types/contracts/Breeder";
 
-describe("BreedableNFT", function () {
+describe("Breeder", function () {
   // TODO Test that the fee is deposited on the escrow smart contract
   // TODO Validate genes result once genes algo is done
   // TODO test that you cannot breed other ppl's nfts, although could allow it using a special function with for ex approval(this would be separate from BreedableNFT contract, built on top of it)
