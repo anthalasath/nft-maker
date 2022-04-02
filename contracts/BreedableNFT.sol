@@ -5,11 +5,14 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/PullPayment.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 struct Creature {
     uint256 tokenId;
     uint256[] genes;
     uint256 breedingBlockedUntil;
+    uint256 fatherId;
+    uint256 motherId;
 }
 
 struct Vector2 {
@@ -28,38 +31,30 @@ struct PicturePartCategory {
     string[] picturesUris;
 }
 
-contract BreedableNFT is ERC721, Ownable, PullPayment {
+struct BreedableNFTConstructorArgs {
+    string _name;
+    string _symbol;
+    uint256 _breedingFeeInWei;
+    uint256 _fatherGeneChance;
+    uint256 _motherGeneChance;
+    address _breederContractAddress;
+    PicturePartCategory[] _categories;
+}
+
+contract BreedableNFT is ERC721, Ownable {
+    PicturePartCategory[] picturePartCategories;
     Creature[] creaturesByIdMinusOne;
+
+    address breeder;
     uint256 breedingFeeInWei;
     uint256 fatherGeneChance;
     uint256 motherGeneChance;
 
-    PicturePartCategory[] picturePartCategories;
-
-    event BredByBirth(
-        uint256 indexed fatherId,
-        uint256 indexed motherId,
-        uint256 indexed childId
-    );
-    event PromoCreatureMinted(uint256 tokenId);
-
-    error InexistentCreature(uint256 tokenId);
-    error CannotBreed(uint256 tokenId);
-    error InsufficentFeeAmount(uint256 feeInWei);
-    error NotOwnerOfToken(uint256 tokenId);
+    error CanOnlyBeCalledByBreeder();
     error Exceeds100Percent(uint256 fatherChance, uint256 motherChance);
+    error InexistentCreature(uint256 tokenId);
+    error NotOwnerOfToken(uint256 tokenId);
     error EmptyCategoryPicturesUris(uint256 layer);
-
-    modifier onlyReadyToBreed(uint256 tokenId) {
-        if (!_exists(tokenId)) {
-            revert InexistentCreature(tokenId);
-        }
-        // TODO: ok to use block timestamp for CD ?
-        if (getCreature(tokenId).breedingBlockedUntil > block.timestamp) {
-            revert CannotBreed(tokenId);
-        }
-        _;
-    }
 
     modifier onlyOwnerOf(uint256 tokenId) {
         if (ownerOf(tokenId) != msg.sender) {
@@ -68,26 +63,52 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         _;
     }
 
-    constructor(
-        string memory name,
-        string memory symbol,
-        uint256 _breedingFeeInWei,
-        uint256 _fatherGeneChance,
-        uint256 _motherGeneChance,
-        PicturePartCategory[] memory _categories
-    ) ERC721(name, symbol) {
-        if ((_fatherGeneChance + _motherGeneChance) > 100) {
-            revert Exceeds100Percent(_fatherGeneChance, _motherGeneChance);
+    modifier onlyBreeder() {
+        if (msg.sender != breeder) {
+            revert CanOnlyBeCalledByBreeder();
         }
-        breedingFeeInWei = _breedingFeeInWei;
-        fatherGeneChance = _fatherGeneChance;
-        motherGeneChance = _motherGeneChance;
-        for (uint256 i = 0; i < _categories.length; i++) {
-            if (_categories[i].picturesUris.length == 0) {
+        _;
+    }
+
+    constructor(BreedableNFTConstructorArgs memory args) ERC721(args._name, args._symbol) {
+        if ((args._fatherGeneChance + args._motherGeneChance) > 100) {
+            revert Exceeds100Percent(args._fatherGeneChance, args._motherGeneChance);
+        }
+        breedingFeeInWei = args._breedingFeeInWei;
+        fatherGeneChance = args._fatherGeneChance;
+        motherGeneChance = args._motherGeneChance;
+        breeder = args._breederContractAddress;
+
+        for (uint256 i = 0; i < args._categories.length; i++) {
+            if (args._categories[i].picturesUris.length == 0) {
                 revert EmptyCategoryPicturesUris(i);
             }
-            picturePartCategories.push(_categories[i]);
+            picturePartCategories.push(args._categories[i]);
         }
+    }
+
+    function getBreedingFee() public view returns (uint256) {
+        return breedingFeeInWei;
+    }
+
+    function getBreedingFeeReceiver() public view returns (address) {
+        return owner();
+    }
+
+    function getGeneChances()
+        external
+        view
+        returns (uint256 father, uint256 mother)
+    {
+        return (fatherGeneChance, motherGeneChance);
+    }
+
+    function canBreed(uint256 tokenId) external view returns (bool) {
+        if (!_exists(tokenId)) {
+            revert InexistentCreature(tokenId);
+        }
+        // TODO: ok to use block timestamp for CD ?
+        return getCreature(tokenId).breedingBlockedUntil > block.timestamp;
     }
 
     function getPicture(uint256 layer, uint256 gene)
@@ -98,19 +119,23 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         uint256 len = picturePartCategories[layer].picturesUris.length;
         uint256 index = gene % len;
         string memory uri = picturePartCategories[layer].picturesUris[index];
-        return Picture({position: picturePartCategories[layer].position, uri: uri});
+        return
+            Picture({
+                position: picturePartCategories[layer].position,
+                uri: uri
+            });
     }
 
-    function getPicturePartCategory(uint256 layer) public view returns (PicturePartCategory memory) {
+    function getPicturePartCategory(uint256 layer)
+        public
+        view
+        returns (PicturePartCategory memory)
+    {
         return picturePartCategories[layer];
     }
 
     function getPicturePartCategoriesCount() public view returns (uint256) {
         return picturePartCategories.length;
-    }
-
-    function getBreedingFee() public view returns (uint256) {
-        return breedingFeeInWei;
     }
 
     function getCreature(uint256 tokenId)
@@ -124,81 +149,39 @@ contract BreedableNFT is ERC721, Ownable, PullPayment {
         return creaturesByIdMinusOne[tokenId - 1];
     }
 
-    function mintPromo(uint256[] memory genes) public onlyOwner {
-        uint256 tokenId = mint(genes, owner()).tokenId;
-        emit PromoCreatureMinted(tokenId);
-    }
-
-    function breed(uint256 fatherId, uint256 motherId)
+    function mintPromo(uint256[] memory genes, address to)
         public
-        payable
-        onlyReadyToBreed(fatherId)
-        onlyReadyToBreed(motherId)
-        onlyOwnerOf(fatherId)
-        onlyOwnerOf(motherId)
-    {
-        if (msg.value != breedingFeeInWei) {
-            revert InsufficentFeeAmount(breedingFeeInWei);
-        }
-        Creature memory father = getCreature(fatherId);
-        Creature memory mother = getCreature(motherId);
-        // TODO: Random words
-        uint256[] memory randomWords = new uint256[](picturePartCategories.length);
-        for (uint256 i = 0; i < randomWords.length; i++) {
-            randomWords[i] = i;
-        }
-        uint256[] memory childGenes = getChildGenes(
-            father.genes,
-            mother.genes,
-            randomWords
-        );
-        // TODO: Allow custom option to sometimes give twins ?
-        uint256 childId = mint(childGenes, msg.sender).tokenId;
-        emit BredByBirth(fatherId, motherId, childId);
-
-        _asyncTransfer(owner(), msg.value);
-    }
-
-    function getChildGenes(
-        uint256[] memory fatherGenes,
-        uint256[] memory motherGenes,
-        uint256[] memory randomWords
-    ) private view returns (uint256[] memory) {
-        uint256[] memory childGenes = new uint256[](picturePartCategories.length);
-        for (uint256 i = 0; i < childGenes.length; i++) {
-            childGenes[i] = generateChildGene(
-                fatherGenes[i],
-                motherGenes[i],
-                randomWords[i]
-            );
-        }
-        return childGenes;
-    }
-
-    function generateChildGene(
-        uint256 fatherGene,
-        uint256 motherGene,
-        uint256 randomWord
-    ) private view returns (uint256) {
-        // TODO: Random mutations
-        uint256 roll = randomWord % 100;
-        if (roll <= fatherGeneChance) {
-            return fatherGene;
-        } else if (roll <= motherGeneChance) {
-            return motherGene;
-        } else {
-            return randomWord;
-        }
-    }
-
-    function mint(uint256[] memory genes, address to)
-        private
+        onlyOwner
         returns (Creature memory)
     {
+        return _mint(genes, 0, 0, to);
+    }
+
+    function mintFromBirth(
+        uint256[] memory genes,
+        uint256 fatherId,
+        uint256 motherId,
+        address to
+    ) external onlyBreeder returns (Creature memory) {
+        return _mint(genes, fatherId, motherId, to);
+    }
+
+    function _mint(
+        uint256[] memory genes,
+        uint256 fatherId,
+        uint256 motherId,
+        address to
+    ) private returns (Creature memory) {
         uint256 tokenId = creaturesByIdMinusOne.length + 1;
         _safeMint(to, tokenId);
         creaturesByIdMinusOne.push(
-            Creature({tokenId: tokenId, genes: genes, breedingBlockedUntil: 0})
+            Creature({
+                tokenId: tokenId,
+                genes: genes,
+                breedingBlockedUntil: 0,
+                fatherId: fatherId,
+                motherId: motherId
+            })
         );
         return getCreature(tokenId);
     }

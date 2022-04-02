@@ -2,3 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { BreedableNFT__factory } from "./BreedableNFT__factory";
+export { BreedableNFTDeployer__factory } from "./BreedableNFTDeployer__factory";
+export { Breeder__factory } from "./Breeder__factory";

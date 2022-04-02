@@ -9,7 +9,6 @@ import type {
   CallOverrides,
   ContractTransaction,
   Overrides,
-  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -46,16 +45,54 @@ export type PicturePartCategoryStructOutput = [
   string[]
 ] & { name: string; position: Vector2StructOutput; picturesUris: string[] };
 
+export type BreedableNFTConstructorArgsStruct = {
+  _name: string;
+  _symbol: string;
+  _breedingFeeInWei: BigNumberish;
+  _fatherGeneChance: BigNumberish;
+  _motherGeneChance: BigNumberish;
+  _breederContractAddress: string;
+  _categories: PicturePartCategoryStruct[];
+};
+
+export type BreedableNFTConstructorArgsStructOutput = [
+  string,
+  string,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  string,
+  PicturePartCategoryStructOutput[]
+] & {
+  _name: string;
+  _symbol: string;
+  _breedingFeeInWei: BigNumber;
+  _fatherGeneChance: BigNumber;
+  _motherGeneChance: BigNumber;
+  _breederContractAddress: string;
+  _categories: PicturePartCategoryStructOutput[];
+};
+
 export type CreatureStruct = {
   tokenId: BigNumberish;
   genes: BigNumberish[];
   breedingBlockedUntil: BigNumberish;
+  fatherId: BigNumberish;
+  motherId: BigNumberish;
 };
 
-export type CreatureStructOutput = [BigNumber, BigNumber[], BigNumber] & {
+export type CreatureStructOutput = [
+  BigNumber,
+  BigNumber[],
+  BigNumber,
+  BigNumber,
+  BigNumber
+] & {
   tokenId: BigNumber;
   genes: BigNumber[];
   breedingBlockedUntil: BigNumber;
+  fatherId: BigNumber;
+  motherId: BigNumber;
 };
 
 export type PictureStruct = { position: Vector2Struct; uri: string };
@@ -69,19 +106,21 @@ export interface BreedableNFTInterface extends utils.Interface {
   functions: {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
-    "breed(uint256,uint256)": FunctionFragment;
+    "canBreed(uint256)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getBreedingFee()": FunctionFragment;
+    "getBreedingFeeReceiver()": FunctionFragment;
     "getCreature(uint256)": FunctionFragment;
+    "getGeneChances()": FunctionFragment;
     "getPicture(uint256,uint256)": FunctionFragment;
     "getPicturePartCategoriesCount()": FunctionFragment;
     "getPicturePartCategory(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
-    "mintPromo(uint256[])": FunctionFragment;
+    "mintFromBirth(uint256[],uint256,uint256,address)": FunctionFragment;
+    "mintPromo(uint256[],address)": FunctionFragment;
     "name()": FunctionFragment;
     "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
-    "payments(address)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
@@ -91,26 +130,27 @@ export interface BreedableNFTInterface extends utils.Interface {
     "tokenURI(uint256)": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "withdrawPayments(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "approve"
       | "balanceOf"
-      | "breed"
+      | "canBreed"
       | "getApproved"
       | "getBreedingFee"
+      | "getBreedingFeeReceiver"
       | "getCreature"
+      | "getGeneChances"
       | "getPicture"
       | "getPicturePartCategoriesCount"
       | "getPicturePartCategory"
       | "isApprovedForAll"
+      | "mintFromBirth"
       | "mintPromo"
       | "name"
       | "owner"
       | "ownerOf"
-      | "payments"
       | "renounceOwnership"
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
@@ -120,7 +160,6 @@ export interface BreedableNFTInterface extends utils.Interface {
       | "tokenURI"
       | "transferFrom"
       | "transferOwnership"
-      | "withdrawPayments"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -129,8 +168,8 @@ export interface BreedableNFTInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "breed",
-    values: [BigNumberish, BigNumberish]
+    functionFragment: "canBreed",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
@@ -141,8 +180,16 @@ export interface BreedableNFTInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getBreedingFeeReceiver",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getCreature",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getGeneChances",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getPicture",
@@ -161,8 +208,12 @@ export interface BreedableNFTInterface extends utils.Interface {
     values: [string, string]
   ): string;
   encodeFunctionData(
+    functionFragment: "mintFromBirth",
+    values: [BigNumberish[], BigNumberish, BigNumberish, string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "mintPromo",
-    values: [BigNumberish[]]
+    values: [BigNumberish[], string]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -170,7 +221,6 @@ export interface BreedableNFTInterface extends utils.Interface {
     functionFragment: "ownerOf",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "payments", values: [string]): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -204,14 +254,10 @@ export interface BreedableNFTInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "withdrawPayments",
-    values: [string]
-  ): string;
 
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "breed", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "canBreed", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getApproved",
     data: BytesLike
@@ -221,7 +267,15 @@ export interface BreedableNFTInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getBreedingFeeReceiver",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getCreature",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getGeneChances",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getPicture", data: BytesLike): Result;
@@ -237,11 +291,14 @@ export interface BreedableNFTInterface extends utils.Interface {
     functionFragment: "isApprovedForAll",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "mintFromBirth",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "mintPromo", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "payments", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -272,25 +329,17 @@ export interface BreedableNFTInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "withdrawPayments",
-    data: BytesLike
-  ): Result;
 
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
-    "BredByBirth(uint256,uint256,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
-    "PromoCreatureMinted(uint256)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BredByBirth"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "PromoCreatureMinted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
@@ -318,18 +367,6 @@ export type ApprovalForAllEvent = TypedEvent<
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
-export interface BredByBirthEventObject {
-  fatherId: BigNumber;
-  motherId: BigNumber;
-  childId: BigNumber;
-}
-export type BredByBirthEvent = TypedEvent<
-  [BigNumber, BigNumber, BigNumber],
-  BredByBirthEventObject
->;
-
-export type BredByBirthEventFilter = TypedEventFilter<BredByBirthEvent>;
-
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
   newOwner: string;
@@ -341,17 +378,6 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
-
-export interface PromoCreatureMintedEventObject {
-  tokenId: BigNumber;
-}
-export type PromoCreatureMintedEvent = TypedEvent<
-  [BigNumber],
-  PromoCreatureMintedEventObject
->;
-
-export type PromoCreatureMintedEventFilter =
-  TypedEventFilter<PromoCreatureMintedEvent>;
 
 export interface TransferEventObject {
   from: string;
@@ -400,11 +426,10 @@ export interface BreedableNFT extends BaseContract {
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    breed(
-      fatherId: BigNumberish,
-      motherId: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    canBreed(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     getApproved(
       tokenId: BigNumberish,
@@ -413,10 +438,18 @@ export interface BreedableNFT extends BaseContract {
 
     getBreedingFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    getBreedingFeeReceiver(overrides?: CallOverrides): Promise<[string]>;
+
     getCreature(
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[CreatureStructOutput]>;
+
+    getGeneChances(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber] & { father: BigNumber; mother: BigNumber }
+    >;
 
     getPicture(
       layer: BigNumberish,
@@ -439,8 +472,17 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    mintFromBirth(
+      genes: BigNumberish[],
+      fatherId: BigNumberish,
+      motherId: BigNumberish,
+      to: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     mintPromo(
       genes: BigNumberish[],
+      to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -452,8 +494,6 @@ export interface BreedableNFT extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
-
-    payments(dest: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -503,11 +543,6 @@ export interface BreedableNFT extends BaseContract {
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    withdrawPayments(
-      payee: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
   };
 
   approve(
@@ -518,11 +553,7 @@ export interface BreedableNFT extends BaseContract {
 
   balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  breed(
-    fatherId: BigNumberish,
-    motherId: BigNumberish,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  canBreed(tokenId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
   getApproved(
     tokenId: BigNumberish,
@@ -531,10 +562,16 @@ export interface BreedableNFT extends BaseContract {
 
   getBreedingFee(overrides?: CallOverrides): Promise<BigNumber>;
 
+  getBreedingFeeReceiver(overrides?: CallOverrides): Promise<string>;
+
   getCreature(
     tokenId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<CreatureStructOutput>;
+
+  getGeneChances(
+    overrides?: CallOverrides
+  ): Promise<[BigNumber, BigNumber] & { father: BigNumber; mother: BigNumber }>;
 
   getPicture(
     layer: BigNumberish,
@@ -555,8 +592,17 @@ export interface BreedableNFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  mintFromBirth(
+    genes: BigNumberish[],
+    fatherId: BigNumberish,
+    motherId: BigNumberish,
+    to: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   mintPromo(
     genes: BigNumberish[],
+    to: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -565,8 +611,6 @@ export interface BreedableNFT extends BaseContract {
   owner(overrides?: CallOverrides): Promise<string>;
 
   ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  payments(dest: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -614,11 +658,6 @@ export interface BreedableNFT extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  withdrawPayments(
-    payee: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     approve(
       to: string,
@@ -628,11 +667,10 @@ export interface BreedableNFT extends BaseContract {
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    breed(
-      fatherId: BigNumberish,
-      motherId: BigNumberish,
+    canBreed(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<boolean>;
 
     getApproved(
       tokenId: BigNumberish,
@@ -641,10 +679,18 @@ export interface BreedableNFT extends BaseContract {
 
     getBreedingFee(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getBreedingFeeReceiver(overrides?: CallOverrides): Promise<string>;
+
     getCreature(
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<CreatureStructOutput>;
+
+    getGeneChances(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber] & { father: BigNumber; mother: BigNumber }
+    >;
 
     getPicture(
       layer: BigNumberish,
@@ -667,15 +713,25 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    mintPromo(genes: BigNumberish[], overrides?: CallOverrides): Promise<void>;
+    mintFromBirth(
+      genes: BigNumberish[],
+      fatherId: BigNumberish,
+      motherId: BigNumberish,
+      to: string,
+      overrides?: CallOverrides
+    ): Promise<CreatureStructOutput>;
+
+    mintPromo(
+      genes: BigNumberish[],
+      to: string,
+      overrides?: CallOverrides
+    ): Promise<CreatureStructOutput>;
 
     name(overrides?: CallOverrides): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-    payments(dest: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -720,8 +776,6 @@ export interface BreedableNFT extends BaseContract {
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    withdrawPayments(payee: string, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
@@ -747,17 +801,6 @@ export interface BreedableNFT extends BaseContract {
       approved?: null
     ): ApprovalForAllEventFilter;
 
-    "BredByBirth(uint256,uint256,uint256)"(
-      fatherId?: BigNumberish | null,
-      motherId?: BigNumberish | null,
-      childId?: BigNumberish | null
-    ): BredByBirthEventFilter;
-    BredByBirth(
-      fatherId?: BigNumberish | null,
-      motherId?: BigNumberish | null,
-      childId?: BigNumberish | null
-    ): BredByBirthEventFilter;
-
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
@@ -766,11 +809,6 @@ export interface BreedableNFT extends BaseContract {
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
-
-    "PromoCreatureMinted(uint256)"(
-      tokenId?: null
-    ): PromoCreatureMintedEventFilter;
-    PromoCreatureMinted(tokenId?: null): PromoCreatureMintedEventFilter;
 
     "Transfer(address,address,uint256)"(
       from?: string | null,
@@ -793,10 +831,9 @@ export interface BreedableNFT extends BaseContract {
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    breed(
-      fatherId: BigNumberish,
-      motherId: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    canBreed(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getApproved(
@@ -806,10 +843,14 @@ export interface BreedableNFT extends BaseContract {
 
     getBreedingFee(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getBreedingFeeReceiver(overrides?: CallOverrides): Promise<BigNumber>;
+
     getCreature(
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getGeneChances(overrides?: CallOverrides): Promise<BigNumber>;
 
     getPicture(
       layer: BigNumberish,
@@ -832,8 +873,17 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    mintFromBirth(
+      genes: BigNumberish[],
+      fatherId: BigNumberish,
+      motherId: BigNumberish,
+      to: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     mintPromo(
       genes: BigNumberish[],
+      to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -845,8 +895,6 @@ export interface BreedableNFT extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    payments(dest: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -896,11 +944,6 @@ export interface BreedableNFT extends BaseContract {
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    withdrawPayments(
-      payee: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -915,10 +958,9 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    breed(
-      fatherId: BigNumberish,
-      motherId: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    canBreed(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getApproved(
@@ -928,10 +970,16 @@ export interface BreedableNFT extends BaseContract {
 
     getBreedingFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    getBreedingFeeReceiver(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getCreature(
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    getGeneChances(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getPicture(
       layer: BigNumberish,
@@ -954,8 +1002,17 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    mintFromBirth(
+      genes: BigNumberish[],
+      fatherId: BigNumberish,
+      motherId: BigNumberish,
+      to: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     mintPromo(
       genes: BigNumberish[],
+      to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -965,11 +1022,6 @@ export interface BreedableNFT extends BaseContract {
 
     ownerOf(
       tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    payments(
-      dest: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1019,11 +1071,6 @@ export interface BreedableNFT extends BaseContract {
 
     transferOwnership(
       newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawPayments(
-      payee: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

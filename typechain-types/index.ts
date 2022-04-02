@@ -6,6 +6,10 @@ export type { openzeppelin };
 import type * as contracts from "./contracts";
 export type { contracts };
 export * as factories from "./factories";
+export type { AccessControl } from "./@openzeppelin/contracts/access/AccessControl";
+export { AccessControl__factory } from "./factories/@openzeppelin/contracts/access/AccessControl__factory";
+export type { IAccessControl } from "./@openzeppelin/contracts/access/IAccessControl";
+export { IAccessControl__factory } from "./factories/@openzeppelin/contracts/access/IAccessControl__factory";
 export type { Ownable } from "./@openzeppelin/contracts/access/Ownable";
 export { Ownable__factory } from "./factories/@openzeppelin/contracts/access/Ownable__factory";
 export type { PullPayment } from "./@openzeppelin/contracts/security/PullPayment";
@@ -26,3 +30,7 @@ export type { IERC165 } from "./@openzeppelin/contracts/utils/introspection/IERC
 export { IERC165__factory } from "./factories/@openzeppelin/contracts/utils/introspection/IERC165__factory";
 export type { BreedableNFT } from "./contracts/BreedableNFT";
 export { BreedableNFT__factory } from "./factories/contracts/BreedableNFT__factory";
+export type { BreedableNFTDeployer } from "./contracts/BreedableNFTDeployer";
+export { BreedableNFTDeployer__factory } from "./factories/contracts/BreedableNFTDeployer__factory";
+export type { Breeder } from "./contracts/Breeder";
+export { Breeder__factory } from "./factories/contracts/Breeder__factory";

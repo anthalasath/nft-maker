@@ -13,6 +13,14 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "AccessControl",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AccessControl__factory>;
+    getContractFactory(
+      name: "IAccessControl",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAccessControl__factory>;
+    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
@@ -52,7 +60,25 @@ declare module "hardhat/types/runtime" {
       name: "BreedableNFT",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BreedableNFT__factory>;
+    getContractFactory(
+      name: "BreedableNFTDeployer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BreedableNFTDeployer__factory>;
+    getContractFactory(
+      name: "Breeder",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Breeder__factory>;
 
+    getContractAt(
+      name: "AccessControl",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AccessControl>;
+    getContractAt(
+      name: "IAccessControl",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAccessControl>;
     getContractAt(
       name: "Ownable",
       address: string,
@@ -103,6 +129,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.BreedableNFT>;
+    getContractAt(
+      name: "BreedableNFTDeployer",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BreedableNFTDeployer>;
+    getContractAt(
+      name: "Breeder",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Breeder>;
 
     // default types
     getContractFactory(
