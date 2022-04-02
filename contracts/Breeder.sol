@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/security/PullPayment.sol";
 import "./BreedableNFT.sol";
 
 contract Breeder is PullPayment {
