@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 struct Creature {
     uint256 tokenId;
@@ -166,6 +167,7 @@ contract BreedableNFT is ERC721, Ownable {
         returns (Creature memory)
     {
         if (!_exists(tokenId)) {
+            console.log("revert getCreature");
             revert InexistentCreature(tokenId);
         }
         return creaturesByIdMinusOne[tokenId - 1];

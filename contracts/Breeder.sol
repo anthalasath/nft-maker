@@ -19,7 +19,7 @@ contract Breeder is PullPayment, VRFConsumerBaseV2 {
     bytes32 keyHash;
     uint64 subId;
     uint16 constant minimumRequestConfirmations = 3;
-    uint32 constant callbackGasLimit = 10000;
+    uint32 constant callbackGasLimit = 100000000;   
 
     mapping(uint256 => Request) contractByRequestId;
 
@@ -96,16 +96,15 @@ contract Breeder is PullPayment, VRFConsumerBaseV2 {
             fatherGeneChance,
             motherGeneChance
         );
-        uint256 childId = tokenContract
+        Creature memory child = tokenContract
             .mintFromBirth(
                 childGenes,
                 request.fatherId,
                 request.motherId,
                 msg.sender
-            )
-            .tokenId;
+            );
 
-        emit BredByBirth(request.contractAddress, childId);
+        emit BredByBirth(request.contractAddress, child.tokenId);
     }
 
     function getChildGenes(

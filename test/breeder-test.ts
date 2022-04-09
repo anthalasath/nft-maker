@@ -61,10 +61,7 @@ describe("Breeder", function () {
     const emittedRandomWordsRequestedEvents = await vrfCoordinatorV2Config.mock.queryFilter(randomWordsRequestedFilter);
     expect(emittedRandomWordsRequestedEvents.length).to.eq(1);
     const requestId = emittedRandomWordsRequestedEvents[0].args.requestId;
-    // await waitForTx(vrfCoordinatorV2Config.mock.fulfillRandomWords(requestId, breedableNFT.address));
-    const vrfTx = await (vrfCoordinatorV2Config.mock.fulfillRandomWords(requestId, breedableNFT.address));
-    const vrfReceipt = await vrfTx.wait();
-    console.log(vrfReceipt);
+    await waitForTx(vrfCoordinatorV2Config.mock.fulfillRandomWords(requestId, breeder.address));
     const emittedBredByBirthEvents = await breeder.queryFilter(bredByBirthFilter);
     expect(emittedBredByBirthEvents.length).to.eq(1);
     const bredByBirthEvent = emittedBredByBirthEvents[0];
