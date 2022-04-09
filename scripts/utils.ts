@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber, BigNumberish, ContractTransaction } from "ethers";
 import { ethers } from "hardhat";
 import { VRFCoordinatorV2Mock } from "../typechain-types/contracts/test/VRFCoordinatorV2Mock";
 import { BreedableNFT, CreatureStruct, PicturePartCategoryStruct, PromoCreatureMintedEvent, Vector2Struct } from "../typechain-types/contracts/BreedableNFT";
@@ -52,4 +52,9 @@ export async function createFundedSubcription(vrfCoordinatorV2WithSigner: VRFCoo
     const subId = event.args.subId;
     await vrfCoordinatorV2WithSigner.fundSubscription(subId, amount);
     return subId;
+}
+
+
+export async function waitForTx(tx: Promise<ContractTransaction>) {
+    await (await tx).wait();
 }

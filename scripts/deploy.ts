@@ -47,15 +47,17 @@ function getAddresses(): any {
 interface VRFCoordinatorV2Config {
     vrfCoordinatorV2Address: string
     subId: BigNumberish
-    keyHash: string
+    keyHash: string,
+    mock?: VRFCoordinatorV2Mock
 }
 
 async function getVRFCoordinatorV2Config(): Promise<VRFCoordinatorV2Config> {
     let vrfCoordinatorV2Address: string;
     let subId: BigNumberish;
     const keyHash = "0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311"; // TODO: Double check how to get this
+    let mock: VRFCoordinatorV2Mock | undefined;
     if (DEV_NETWORKS.has(hre.network.name)) {
-        const mock = await deployVRFCoordinatorV2Mock();
+        mock = await deployVRFCoordinatorV2Mock();
         vrfCoordinatorV2Address = mock.address;
         subId = await createFundedSubcription(mock);
     } else {
@@ -70,25 +72,29 @@ async function getVRFCoordinatorV2Config(): Promise<VRFCoordinatorV2Config> {
         }
         subId = networkConfig.subId;
     }
-    return { vrfCoordinatorV2Address, subId, keyHash };
+    return { vrfCoordinatorV2Address, subId, keyHash, mock };
 }
 
-export async function deployBreeder(): Promise<Breeder> {
-    const Breeder = await hre.ethers.getContractFactory("Breeder");
-    const { vrfCoordinatorV2Address, subId, keyHash } = await getVRFCoordinatorV2Config();
-    const breeder = await Breeder.deploy(vrfCoordinatorV2Address, keyHash, subId) as Breeder;
-    await breeder.deployed();
-    return breeder;
-}
-export interface DeployBreedableNFTResult {
-    breedableNFT: BreedableNFT
-    vrfCoordinator: VRFCoordinatorV2Interface
+export interface DeployBreederResult {
     breeder: Breeder
+    vrfCoordinatorV2Config: VRFCoordinatorV2Config
+}
+
+export async function deployBreeder(): Promise<DeployBreederResult> {
+    const Breeder = await hre.ethers.getContractFactory("Breeder");
+    const vrfCoordinatorV2Config = await getVRFCoordinatorV2Config();
+    const breeder = await Breeder.deploy(vrfCoordinatorV2Config.vrfCoordinatorV2Address, vrfCoordinatorV2Config.keyHash, vrfCoordinatorV2Config.subId) as Breeder;
+    await breeder.deployed();
+    return { breeder, vrfCoordinatorV2Config };
+}
+export interface DeploySampleBreedableNFTResult {
+    breedableNFT: BreedableNFT
+    deployBreederResult: DeployBreederResult
     deployer: BreedableNFTDeployer
 }
 
-export async function deploySampleBreedableNFT(): Promise<{ breedableNFT: BreedableNFT, breeder: Breeder, deployer: BreedableNFTDeployer }> {
-    const breeder = await deployBreeder();
+export async function deploySampleBreedableNFT(): Promise<DeploySampleBreedableNFTResult> {
+    const deployBreederResult = await deployBreeder();
     const deployer = await deployBreedableNFTDeployer();
     const breedableNFT = await deployBreedableNFT(deployer, {
         name: "Gremlin",
@@ -97,14 +103,14 @@ export async function deploySampleBreedableNFT(): Promise<{ breedableNFT: Breeda
         fatherGeneChance: 45,
         motherGeneChance: 45,
         categories: ["Head", "Hat", "Eyes"].map(newDummyPicturePartCategory),
-        breederContractAddress: breeder.address
+        breederContractAddress: deployBreederResult.breeder.address
     });
-    return { breedableNFT, breeder, deployer };
+    return { breedableNFT, deployBreederResult, deployer };
 }
 
 async function main(): Promise<void> {
-    const { breedableNFT, breeder } = await deploySampleBreedableNFT();
-    console.log(`Deployed BreedableNFT at ${breedableNFT.address} and breeder at ${breeder.address}`);
+    const { breedableNFT, deployBreederResult } = await deploySampleBreedableNFT();
+    console.log(`Deployed BreedableNFT at ${breedableNFT.address} and breeder at ${deployBreederResult.breeder.address}`);
 }
 
 main()

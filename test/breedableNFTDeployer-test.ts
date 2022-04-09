@@ -8,7 +8,7 @@ import BreedableNFTArtifact from "../artifacts/contracts/BreedableNFT.sol/Breeda
 
 describe("BreedableNFTDeployer", function () {
     it("Deploys the contract with the correct breeding fee receiver", async () => {
-        const breeder = await deployBreeder();
+        const { breeder } = await deployBreeder();
         const deployer = await deployBreedableNFTDeployer();
         const tx = await deployer.deploy({
             name: "Gremlin",

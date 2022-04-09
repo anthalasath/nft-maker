@@ -15,7 +15,7 @@ describe("BreedableNFT", function () {
 
   async function deploy(): Promise<BreedableNFT> {
     const deployer = await deployBreedableNFTDeployer();
-    const breeder = await deployBreeder();
+    const { breeder } = await deployBreeder();
     return await deployBreedableNFT(deployer, {
       name,
       symbol,
