@@ -27,22 +27,43 @@ import type {
   OnEvent,
 } from "../common";
 
+export type RequestStruct = {
+  contractAddress: string;
+  fatherId: BigNumberish;
+  motherId: BigNumberish;
+};
+
+export type RequestStructOutput = [string, BigNumber, BigNumber] & {
+  contractAddress: string;
+  fatherId: BigNumber;
+  motherId: BigNumber;
+};
+
 export interface BreederInterface extends utils.Interface {
   functions: {
-    "breed(address,uint256,uint256)": FunctionFragment;
+    "breed((address,uint256,uint256))": FunctionFragment;
     "payments(address)": FunctionFragment;
+    "rawFulfillRandomWords(uint256,uint256[])": FunctionFragment;
     "withdrawPayments(address)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "breed" | "payments" | "withdrawPayments"
+    nameOrSignatureOrTopic:
+      | "breed"
+      | "payments"
+      | "rawFulfillRandomWords"
+      | "withdrawPayments"
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "breed",
-    values: [string, BigNumberish, BigNumberish]
+    values: [RequestStruct]
   ): string;
   encodeFunctionData(functionFragment: "payments", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "rawFulfillRandomWords",
+    values: [BigNumberish, BigNumberish[]]
+  ): string;
   encodeFunctionData(
     functionFragment: "withdrawPayments",
     values: [string]
@@ -51,15 +72,21 @@ export interface BreederInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "breed", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "payments", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "rawFulfillRandomWords",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "withdrawPayments",
     data: BytesLike
   ): Result;
 
   events: {
     "BredByBirth(address,uint256)": EventFragment;
+    "BreedingStarted(address,uint256,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "BredByBirth"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BreedingStarted"): EventFragment;
 }
 
 export interface BredByBirthEventObject {
@@ -72,6 +99,18 @@ export type BredByBirthEvent = TypedEvent<
 >;
 
 export type BredByBirthEventFilter = TypedEventFilter<BredByBirthEvent>;
+
+export interface BreedingStartedEventObject {
+  contractAddress: string;
+  fatherId: BigNumber;
+  motherId: BigNumber;
+}
+export type BreedingStartedEvent = TypedEvent<
+  [string, BigNumber, BigNumber],
+  BreedingStartedEventObject
+>;
+
+export type BreedingStartedEventFilter = TypedEventFilter<BreedingStartedEvent>;
 
 export interface Breeder extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -101,13 +140,17 @@ export interface Breeder extends BaseContract {
 
   functions: {
     breed(
-      contractAddress: string,
-      fatherId: BigNumberish,
-      motherId: BigNumberish,
+      request: RequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     payments(dest: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    rawFulfillRandomWords(
+      requestId: BigNumberish,
+      randomWords: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     withdrawPayments(
       payee: string,
@@ -116,13 +159,17 @@ export interface Breeder extends BaseContract {
   };
 
   breed(
-    contractAddress: string,
-    fatherId: BigNumberish,
-    motherId: BigNumberish,
+    request: RequestStruct,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   payments(dest: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  rawFulfillRandomWords(
+    requestId: BigNumberish,
+    randomWords: BigNumberish[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   withdrawPayments(
     payee: string,
@@ -130,14 +177,15 @@ export interface Breeder extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    breed(
-      contractAddress: string,
-      fatherId: BigNumberish,
-      motherId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    breed(request: RequestStruct, overrides?: CallOverrides): Promise<void>;
 
     payments(dest: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    rawFulfillRandomWords(
+      requestId: BigNumberish,
+      randomWords: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     withdrawPayments(payee: string, overrides?: CallOverrides): Promise<void>;
   };
@@ -151,17 +199,32 @@ export interface Breeder extends BaseContract {
       contractAddress?: string | null,
       childId?: BigNumberish | null
     ): BredByBirthEventFilter;
+
+    "BreedingStarted(address,uint256,uint256)"(
+      contractAddress?: string | null,
+      fatherId?: BigNumberish | null,
+      motherId?: BigNumberish | null
+    ): BreedingStartedEventFilter;
+    BreedingStarted(
+      contractAddress?: string | null,
+      fatherId?: BigNumberish | null,
+      motherId?: BigNumberish | null
+    ): BreedingStartedEventFilter;
   };
 
   estimateGas: {
     breed(
-      contractAddress: string,
-      fatherId: BigNumberish,
-      motherId: BigNumberish,
+      request: RequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     payments(dest: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    rawFulfillRandomWords(
+      requestId: BigNumberish,
+      randomWords: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     withdrawPayments(
       payee: string,
@@ -171,15 +234,19 @@ export interface Breeder extends BaseContract {
 
   populateTransaction: {
     breed(
-      contractAddress: string,
-      fatherId: BigNumberish,
-      motherId: BigNumberish,
+      request: RequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     payments(
       dest: string,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    rawFulfillRandomWords(
+      requestId: BigNumberish,
+      randomWords: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     withdrawPayments(

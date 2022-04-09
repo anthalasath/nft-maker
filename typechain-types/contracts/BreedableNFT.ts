@@ -106,6 +106,7 @@ export interface BreedableNFTInterface extends utils.Interface {
   functions: {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
+    "breedingCooldown()": FunctionFragment;
     "canBreed(uint256)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getBreedingFee()": FunctionFragment;
@@ -116,6 +117,7 @@ export interface BreedableNFTInterface extends utils.Interface {
     "getPicturePartCategoriesCount()": FunctionFragment;
     "getPicturePartCategory(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
+    "markBreedingStarted(uint256,uint256)": FunctionFragment;
     "mintFromBirth(uint256[],uint256,uint256,address)": FunctionFragment;
     "mintPromo(uint256[],address)": FunctionFragment;
     "name()": FunctionFragment;
@@ -136,6 +138,7 @@ export interface BreedableNFTInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "approve"
       | "balanceOf"
+      | "breedingCooldown"
       | "canBreed"
       | "getApproved"
       | "getBreedingFee"
@@ -146,6 +149,7 @@ export interface BreedableNFTInterface extends utils.Interface {
       | "getPicturePartCategoriesCount"
       | "getPicturePartCategory"
       | "isApprovedForAll"
+      | "markBreedingStarted"
       | "mintFromBirth"
       | "mintPromo"
       | "name"
@@ -167,6 +171,10 @@ export interface BreedableNFTInterface extends utils.Interface {
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "breedingCooldown",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "canBreed",
     values: [BigNumberish]
@@ -206,6 +214,10 @@ export interface BreedableNFTInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
     values: [string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "markBreedingStarted",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "mintFromBirth",
@@ -257,6 +269,10 @@ export interface BreedableNFTInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "breedingCooldown",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "canBreed", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getApproved",
@@ -289,6 +305,10 @@ export interface BreedableNFTInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "markBreedingStarted",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -439,6 +459,8 @@ export interface BreedableNFT extends BaseContract {
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    breedingCooldown(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     canBreed(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -470,9 +492,7 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[PictureStructOutput]>;
 
-    getPicturePartCategoriesCount(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    getPicturePartCategoriesCount(overrides?: CallOverrides): Promise<[number]>;
 
     getPicturePartCategory(
       layer: BigNumberish,
@@ -484,6 +504,12 @@ export interface BreedableNFT extends BaseContract {
       operator: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
+
+    markBreedingStarted(
+      fatherId: BigNumberish,
+      motherId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     mintFromBirth(
       genes: BigNumberish[],
@@ -566,6 +592,8 @@ export interface BreedableNFT extends BaseContract {
 
   balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+  breedingCooldown(overrides?: CallOverrides): Promise<BigNumber>;
+
   canBreed(tokenId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
   getApproved(
@@ -592,7 +620,7 @@ export interface BreedableNFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<PictureStructOutput>;
 
-  getPicturePartCategoriesCount(overrides?: CallOverrides): Promise<BigNumber>;
+  getPicturePartCategoriesCount(overrides?: CallOverrides): Promise<number>;
 
   getPicturePartCategory(
     layer: BigNumberish,
@@ -604,6 +632,12 @@ export interface BreedableNFT extends BaseContract {
     operator: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
+
+  markBreedingStarted(
+    fatherId: BigNumberish,
+    motherId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   mintFromBirth(
     genes: BigNumberish[],
@@ -680,6 +714,8 @@ export interface BreedableNFT extends BaseContract {
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    breedingCooldown(overrides?: CallOverrides): Promise<BigNumber>;
+
     canBreed(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -711,9 +747,7 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PictureStructOutput>;
 
-    getPicturePartCategoriesCount(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    getPicturePartCategoriesCount(overrides?: CallOverrides): Promise<number>;
 
     getPicturePartCategory(
       layer: BigNumberish,
@@ -725,6 +759,12 @@ export interface BreedableNFT extends BaseContract {
       operator: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    markBreedingStarted(
+      fatherId: BigNumberish,
+      motherId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     mintFromBirth(
       genes: BigNumberish[],
@@ -849,6 +889,8 @@ export interface BreedableNFT extends BaseContract {
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    breedingCooldown(overrides?: CallOverrides): Promise<BigNumber>;
+
     canBreed(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -889,6 +931,12 @@ export interface BreedableNFT extends BaseContract {
       owner: string,
       operator: string,
       overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    markBreedingStarted(
+      fatherId: BigNumberish,
+      motherId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     mintFromBirth(
@@ -976,6 +1024,8 @@ export interface BreedableNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    breedingCooldown(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     canBreed(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1018,6 +1068,12 @@ export interface BreedableNFT extends BaseContract {
       owner: string,
       operator: string,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    markBreedingStarted(
+      fatherId: BigNumberish,
+      motherId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     mintFromBirth(

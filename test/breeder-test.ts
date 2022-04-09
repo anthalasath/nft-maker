@@ -3,7 +3,7 @@ import { BigNumberish } from "ethers";
 import { deploySampleBreedableNFT } from "../scripts/deploy";
 import { getEvent, mintPromo } from "../scripts/utils";
 import { BreedableNFT, CreatureStruct } from "../typechain-types/contracts/BreedableNFT";
-import { BredByBirthEvent } from "../typechain-types/contracts/Breeder";
+import { BredByBirthEvent, RequestStruct } from "../typechain-types/contracts/Breeder";
 
 describe("Breeder", function () {
   // TODO Test that the fee is deposited on the escrow smart contract
@@ -12,8 +12,13 @@ describe("Breeder", function () {
   it("Breeds a new creature if both parents exist, can breed and the breeding fee is supplied", async () => {
     const { breedableNFT, breeder } = await deploySampleBreedableNFT();
     const [father, mother] = await mintPromoMany(breedableNFT, [[1, 2, 3], [4, 5, 6]]);
+    const request: RequestStruct = {
+      contractAddress: breedableNFT.address,
+      fatherId: father.tokenId,
+      motherId: mother.tokenId
+    };
 
-    const tx = await breeder.breed(breedableNFT.address, father.tokenId, mother.tokenId, { value: await breedableNFT.getBreedingFee() });
+    const tx = await breeder.breed(request, { value: await breedableNFT.getBreedingFee() });
     const receipt = await tx.wait();
 
     const event: BredByBirthEvent = getEvent(receipt.events, "BredByBirth");

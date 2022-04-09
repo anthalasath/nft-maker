@@ -13,7 +13,7 @@ task("overview", "Prints an overview of a deployed BreedableNFT contract")
         const breedingFeeInWei = await breedableNFT.getBreedingFee();
         const picturePartCategoriesCount = await breedableNFT.getPicturePartCategoriesCount();
         const picturePartCategories = [];
-        for (let layer = 0; layer < picturePartCategoriesCount.toNumber(); layer++) {
+        for (let layer = 0; layer < picturePartCategoriesCount; layer++) {
           const cat = await breedableNFT.getPicturePartCategory(layer);
           picturePartCategories.push(cat);
         }

@@ -4,29 +4,51 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/PullPayment.sol";
 import "./BreedableNFT.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
-contract Breeder is PullPayment {
+struct Request {
+    address contractAddress;
+    uint256 fatherId;
+    uint256 motherId;
+}
 
-    event BredByBirth(
+contract Breeder is PullPayment, VRFConsumerBaseV2 {
+    VRFCoordinatorV2Interface vrfCoordinator;
+
+    bytes32 keyHash;
+    uint64 subId;
+    uint16 constant minimumRequestConfirmations = 3;
+    uint32 constant callbackGasLimit = 10000;
+
+    mapping(uint256 => Request) contractByRequestId;
+
+    event BreedingStarted(
         address indexed contractAddress,
-        uint256 indexed childId
+        uint256 indexed fatherId,
+        uint256 indexed motherId
     );
+    event BredByBirth(address indexed contractAddress, uint256 indexed childId);
 
     error CannotBreed(uint256 tokenId);
     error NotOwnerOfToken(uint256 tokenId);
     error InsufficentFeeAmount(uint256 feeInWei);
 
-    function breed(
-        address contractAddress,
-        uint256 fatherId,
-        uint256 motherId
-    ) public payable {
-        BreedableNFT tokenContract = BreedableNFT(contractAddress);
-        if (!tokenContract.canBreed(fatherId)) {
-            revert CannotBreed(fatherId);
+    constructor(bytes32 _keyHash, address _vrfCoordinator)
+        VRFConsumerBaseV2(_vrfCoordinator)
+        PullPayment()
+    {
+        keyHash = _keyHash;
+        vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinator);
+    }
+
+    function breed(Request memory request) public payable {
+        BreedableNFT tokenContract = BreedableNFT(request.contractAddress);
+        if (!tokenContract.canBreed(request.fatherId)) {
+            revert CannotBreed(request.fatherId);
         }
-        if (!tokenContract.canBreed(motherId)) {
-            revert CannotBreed(motherId);
+        if (!tokenContract.canBreed(request.motherId)) {
+            revert CannotBreed(request.motherId);
         }
 
         uint256 breedingFeeInWei = tokenContract.getBreedingFee();
@@ -34,14 +56,36 @@ contract Breeder is PullPayment {
             revert InsufficentFeeAmount(breedingFeeInWei);
         }
 
-        Creature memory father = tokenContract.getCreature(fatherId);
-        Creature memory mother = tokenContract.getCreature(motherId);
 
-        // TODO: Random words
-        uint256[] memory randomWords = new uint256[](father.genes.length);
-        for (uint256 i = 0; i < randomWords.length; i++) {
-            randomWords[i] = i;
-        }
+        uint32 numWords = tokenContract.getPicturePartCategoriesCount();
+        uint256 requestId = vrfCoordinator.requestRandomWords(
+            keyHash,
+            subId,
+            minimumRequestConfirmations,
+            callbackGasLimit,
+            numWords
+        );
+        contractByRequestId[requestId] = request;
+
+        _asyncTransfer(tokenContract.getBreedingFeeReceiver(), msg.value);
+        
+        emit BreedingStarted(
+            request.contractAddress,
+            request.fatherId,
+            request.motherId
+        );
+        tokenContract.markBreedingStarted(request.fatherId, request.motherId);
+    }
+
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
+        internal
+        override
+    {
+        Request memory request = contractByRequestId[requestId];
+        BreedableNFT tokenContract = BreedableNFT(request.contractAddress);
+        Creature memory father = tokenContract.getCreature(request.fatherId);
+        Creature memory mother = tokenContract.getCreature(request.motherId);
+
         (uint256 fatherGeneChance, uint256 motherGeneChance) = tokenContract
             .getGeneChances();
         uint256[] memory childGenes = getChildGenes(
@@ -51,11 +95,16 @@ contract Breeder is PullPayment {
             fatherGeneChance,
             motherGeneChance
         );
-        // TODO: Allow custom option to sometimes give twins ?
-        uint256 childId = tokenContract.mintFromBirth(childGenes, fatherId, motherId, msg.sender).tokenId;
-        emit BredByBirth(contractAddress, childId);
+        uint256 childId = tokenContract
+            .mintFromBirth(
+                childGenes,
+                request.fatherId,
+                request.motherId,
+                msg.sender
+            )
+            .tokenId;
 
-        _asyncTransfer(tokenContract.getBreedingFeeReceiver(), msg.value);
+        emit BredByBirth(request.contractAddress, childId);
     }
 
     function getChildGenes(
@@ -85,7 +134,6 @@ contract Breeder is PullPayment {
         uint256 fatherGeneChance,
         uint256 motherGeneChance
     ) private pure returns (uint256) {
-        // TODO: Random mutations
         uint256 roll = randomWord % 100;
         if (roll <= fatherGeneChance) {
             return fatherGene;

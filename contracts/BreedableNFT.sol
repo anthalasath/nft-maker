@@ -47,11 +47,13 @@ contract BreedableNFT is ERC721, Ownable {
     uint256 breedingFeeInWei;
     uint256 fatherGeneChance;
     uint256 motherGeneChance;
+    uint256 constant public breedingCooldown = 1 hours; // TODO: allow customization
 
     event PromoCreatureMinted(uint256 tokenId);
 
     error CanOnlyBeCalledByBreeder();
     error Exceeds100Percent(uint256 fatherChance, uint256 motherChance);
+    error MaxPictureCategoriesLength(uint256 length);
     error InexistentCreature(uint256 tokenId);
     error NotOwnerOfToken(uint256 tokenId);
     error EmptyCategoryPicturesUris(uint256 layer);
@@ -79,6 +81,10 @@ contract BreedableNFT is ERC721, Ownable {
                 args.motherGeneChance
             );
         }
+        if (args.categories.length > type(uint32).max) {
+            revert MaxPictureCategoriesLength(args.categories.length);
+        }
+
         breedingFeeInWei = args.breedingFeeInWei;
         fatherGeneChance = args.fatherGeneChance;
         motherGeneChance = args.motherGeneChance;
@@ -119,6 +125,14 @@ contract BreedableNFT is ERC721, Ownable {
             creature.breedingBlockedUntil > block.timestamp;
     }
 
+    function markBreedingStarted(uint256 fatherId, uint256 motherId) external onlyBreeder {
+        Creature storage father = creaturesByIdMinusOne[fatherId-1];
+        Creature storage mother = creaturesByIdMinusOne[motherId-1];
+        uint256 breedingBlockedUntil = block.timestamp + breedingCooldown;
+        father.breedingBlockedUntil = breedingBlockedUntil;
+        mother.breedingBlockedUntil = breedingBlockedUntil;
+    }
+
     function getPicture(uint256 layer, uint256 gene)
         public
         view
@@ -142,8 +156,8 @@ contract BreedableNFT is ERC721, Ownable {
         return picturePartCategories[layer];
     }
 
-    function getPicturePartCategoriesCount() public view returns (uint256) {
-        return picturePartCategories.length;
+    function getPicturePartCategoriesCount() public view returns (uint32) {
+        return uint32(picturePartCategories.length);
     }
 
     function getCreature(uint256 tokenId)
