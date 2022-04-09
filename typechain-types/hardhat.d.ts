@@ -13,6 +13,10 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "LinkTokenInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LinkTokenInterface__factory>;
+    getContractFactory(
       name: "VRFCoordinatorV2Interface",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.VRFCoordinatorV2Interface__factory>;
@@ -76,7 +80,16 @@ declare module "hardhat/types/runtime" {
       name: "Breeder",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Breeder__factory>;
+    getContractFactory(
+      name: "VRFCoordinatorV2Mock",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.VRFCoordinatorV2Mock__factory>;
 
+    getContractAt(
+      name: "LinkTokenInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LinkTokenInterface>;
     getContractAt(
       name: "VRFCoordinatorV2Interface",
       address: string,
@@ -157,6 +170,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Breeder>;
+    getContractAt(
+      name: "VRFCoordinatorV2Mock",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.VRFCoordinatorV2Mock>;
 
     // default types
     getContractFactory(

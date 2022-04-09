@@ -6,7 +6,7 @@ import { VRFCoordinatorV2Interface } from "../typechain-types/@chainlink/contrac
 import { getEvent, newDummyPicturePartCategory } from "./utils";
 import BreedableNFTArtifact from "../artifacts/contracts/BreedableNFT.sol/BreedableNFT.json";
 import Addresses from "../tasks/addresses.json";
-import VRFCoordinateV2InterfaceArtifact from "../artifacts/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol/VRFConsumerBaseV2.json";
+import VRFCoordinatorV2InterfaceArtifact from "../artifacts/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol/VRFCoordinatorV2Interface.json";
 import * as hre from "hardhat";
 
 export async function deployBreedableNFTDeployer(): Promise<BreedableNFTDeployer> {
@@ -32,6 +32,7 @@ export async function deployVRFCoordinatorV2Mock(): Promise<VRFCoordinatorV2Inte
 
 const DEV_NETWORKS = (() => {
     const networks = new Set<string>();
+    networks.add("hardhat");
     networks.add("unknown");
     networks.add("rinkeby");
     return networks;
@@ -41,7 +42,7 @@ export async function getVRFCoordinatorV2(): Promise<VRFCoordinatorV2Interface> 
     if (DEV_NETWORKS.has(hre.network.name)) {
         return deployVRFCoordinatorV2Mock();
     }
-    return await hre.ethers.getContractAt(VRFCoordinateV2InterfaceArtifact.abi, getAddresses().VRFCoordinatorV2) as VRFCoordinatorV2Interface;
+    return await hre.ethers.getContractAt(VRFCoordinatorV2InterfaceArtifact.abi, getAddresses().VRFCoordinatorV2) as VRFCoordinatorV2Interface;
 }
 
 function getAddresses(): any {
@@ -70,7 +71,7 @@ export async function deploySampleBreedableNFT(): Promise<{ breedableNFT: Breeda
         name: "Gremlin",
         symbol: "GREM",
         breedingFeeInWei: hre.ethers.utils.parseEther("1"),
-        fatherGeneChance: 45,   
+        fatherGeneChance: 45,
         motherGeneChance: 45,
         categories: ["Head", "Hat", "Eyes"].map(newDummyPicturePartCategory),
         breederContractAddress: breeder.address
