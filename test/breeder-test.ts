@@ -35,6 +35,7 @@ describe("Breeder", function () {
   });
 });
 
+// TODO: remove and put this in the smart contract instead to save gas costs & time
 async function mintPromoMany(breedableNFT: BreedableNFT, genes: BigNumberish[][]): Promise<CreatureStruct[]> {
   return Promise.all(genes.map(g => mintPromo(breedableNFT, g)));
 }
