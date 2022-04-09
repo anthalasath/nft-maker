@@ -3,11 +3,13 @@ import { BreedableNFTDeployedEvent, BreedableNFTDeployer } from "../typechain-ty
 import { BreedableNFT, BreedableNFTConstructorArgsStruct } from "../typechain-types/contracts/BreedableNFT";
 import { Breeder } from "../typechain-types/contracts/Breeder";
 import { VRFCoordinatorV2Interface } from "../typechain-types/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface";
-import { getEvent, newDummyPicturePartCategory } from "./utils";
+import { createFundedSubcription, getEvent, newDummyPicturePartCategory } from "./utils";
 import BreedableNFTArtifact from "../artifacts/contracts/BreedableNFT.sol/BreedableNFT.json";
 import Addresses from "../tasks/addresses.json";
 import VRFCoordinatorV2InterfaceArtifact from "../artifacts/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol/VRFCoordinatorV2Interface.json";
 import * as hre from "hardhat";
+import { VRFCoordinatorV2Mock } from "../typechain-types/contracts/test/VRFCoordinatorV2Mock";
+import config from "../hardhat.config";
 
 export async function deployBreedableNFTDeployer(): Promise<BreedableNFTDeployer> {
     const BreedableNFTDeployer = await hre.ethers.getContractFactory("BreedableNFTDeployer");
@@ -24,10 +26,10 @@ export async function deployBreedableNFT(deployer: BreedableNFTDeployer, args: B
     return breedableNFT;
 }
 
-export async function deployVRFCoordinatorV2Mock(): Promise<VRFCoordinatorV2Interface> {
+export async function deployVRFCoordinatorV2Mock(): Promise<VRFCoordinatorV2Mock> {
     const VRFCoordinatorV2Mock = await hre.ethers.getContractFactory("VRFCoordinatorV2Mock");
     const vrfCoordinatorV2Mock = await VRFCoordinatorV2Mock.deploy(1, 1);
-    return vrfCoordinatorV2Mock as VRFCoordinatorV2Interface;
+    return vrfCoordinatorV2Mock as VRFCoordinatorV2Mock;
 }
 
 const DEV_NETWORKS = (() => {
@@ -38,22 +40,43 @@ const DEV_NETWORKS = (() => {
     return networks;
 })();
 
-export async function getVRFCoordinatorV2(): Promise<VRFCoordinatorV2Interface> {
-    if (DEV_NETWORKS.has(hre.network.name)) {
-        return deployVRFCoordinatorV2Mock();
-    }
-    return await hre.ethers.getContractAt(VRFCoordinatorV2InterfaceArtifact.abi, getAddresses().VRFCoordinatorV2) as VRFCoordinatorV2Interface;
-}
-
 function getAddresses(): any {
     return Addresses;
 }
 
+interface VRFCoordinatorV2Config {
+    vrfCoordinatorV2Address: string
+    subId: BigNumberish
+    keyHash: string
+}
+
+async function getVRFCoordinatorV2Config(): Promise<VRFCoordinatorV2Config> {
+    let vrfCoordinatorV2Address: string;
+    let subId: BigNumberish;
+    const keyHash = "0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311"; // TODO: Double check how to get this
+    if (DEV_NETWORKS.has(hre.network.name)) {
+        const mock = await deployVRFCoordinatorV2Mock();
+        vrfCoordinatorV2Address = mock.address;
+        subId = await createFundedSubcription(mock);
+    } else {
+        const vrfCoordinator = await hre.ethers.getContractAt(VRFCoordinatorV2InterfaceArtifact.abi, getAddresses().VRFCoordinatorV2);
+        vrfCoordinatorV2Address = vrfCoordinator.address;
+        const networkConfig: any = config.networks?.[hre.network.name];
+        if (!networkConfig) {
+            throw new Error(`Network ${hre.network.name} is not defined in hardhat config`);
+        }
+        if (!networkConfig.subId) {
+            throw new Error(`subId for network ${hre.network.name} is not defined in hardhat config`);
+        }
+        subId = networkConfig.subId;
+    }
+    return { vrfCoordinatorV2Address, subId, keyHash };
+}
+
 export async function deployBreeder(): Promise<Breeder> {
-    const vrfCoordinator = await getVRFCoordinatorV2();
     const Breeder = await hre.ethers.getContractFactory("Breeder");
-    const keyHash = "0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311";
-    const breeder = await Breeder.deploy(keyHash, vrfCoordinator.address) as Breeder;
+    const { vrfCoordinatorV2Address, subId, keyHash } = await getVRFCoordinatorV2Config();
+    const breeder = await Breeder.deploy(vrfCoordinatorV2Address, keyHash, subId) as Breeder;
     await breeder.deployed();
     return breeder;
 }

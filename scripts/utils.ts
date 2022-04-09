@@ -1,4 +1,6 @@
-import { BigNumberish } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
+import { ethers } from "hardhat";
+import { VRFCoordinatorV2Mock } from "../typechain-types/contracts/test/VRFCoordinatorV2Mock";
 import { BreedableNFT, CreatureStruct, PicturePartCategoryStruct, PromoCreatureMintedEvent, Vector2Struct } from "../typechain-types/contracts/BreedableNFT";
 
 export function getEvent(events: any[] | undefined, eventName: string): any | null {
@@ -40,4 +42,14 @@ export async function mintPromo(breedableNFT: BreedableNFT, genes: BigNumberish[
     const receipt = await tx.wait();
     const event: PromoCreatureMintedEvent = getEvent(receipt.events, "PromoCreatureMinted");
     return breedableNFT.getCreature(event.args.tokenId);
-  }
+}
+
+
+export async function createFundedSubcription(vrfCoordinatorV2WithSigner: VRFCoordinatorV2Mock, amount: BigNumber = ethers.utils.parseEther("100")): Promise<BigNumber> {
+    const tx = await vrfCoordinatorV2WithSigner.createSubscription();
+    const receipt = await tx.wait();
+    const event = getEvent(receipt.events, "SubscriptionCreated");
+    const subId = event.args.subId;
+    await vrfCoordinatorV2WithSigner.fundSubscription(subId, amount);
+    return subId;
+}

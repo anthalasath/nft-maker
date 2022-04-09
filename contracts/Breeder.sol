@@ -34,12 +34,13 @@ contract Breeder is PullPayment, VRFConsumerBaseV2 {
     error NotOwnerOfToken(uint256 tokenId);
     error InsufficentFeeAmount(uint256 feeInWei);
 
-    constructor(bytes32 _keyHash, address _vrfCoordinator)
+    constructor(address _vrfCoordinator, bytes32 _keyHash, uint64 _subId)
         VRFConsumerBaseV2(_vrfCoordinator)
         PullPayment()
     {
-        keyHash = _keyHash;
         vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinator);
+        keyHash = _keyHash;
+        subId = _subId;
     }
 
     function breed(Request memory request) public payable {
