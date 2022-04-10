@@ -86,7 +86,7 @@ describe("Breeder", function () {
     expect(child.breedingBlockedUntil).to.eq(0);
     const fatherAfterBreeding = await breedableNFT.getCreature(father.tokenId);
     const motherAfterBreeding = await breedableNFT.getCreature(mother.tokenId);
-    const block = await breeder.provider.getBlock(breedTx.blockNumber!);
+    const block = await breeder.provider.getBlock(breedReceipt.blockNumber!);
     const breedingCooldown = await breedableNFT.breedingCooldown();
     const expectedBreedingBlockedUntilForParents = breedingCooldown.add(block.timestamp);
     
