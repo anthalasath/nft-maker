@@ -29,19 +29,21 @@ import type {
 
 export type RequestStruct = {
   contractAddress: string;
+  childReceiver: string;
   fatherId: BigNumberish;
   motherId: BigNumberish;
 };
 
-export type RequestStructOutput = [string, BigNumber, BigNumber] & {
+export type RequestStructOutput = [string, string, BigNumber, BigNumber] & {
   contractAddress: string;
+  childReceiver: string;
   fatherId: BigNumber;
   motherId: BigNumber;
 };
 
 export interface BreederInterface extends utils.Interface {
   functions: {
-    "breed((address,uint256,uint256))": FunctionFragment;
+    "breed((address,address,uint256,uint256))": FunctionFragment;
     "payments(address)": FunctionFragment;
     "rawFulfillRandomWords(uint256,uint256[])": FunctionFragment;
     "withdrawPayments(address)": FunctionFragment;

@@ -9,6 +9,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
 struct Request {
     address contractAddress;
+    address childReceiver;
     uint256 fatherId;
     uint256 motherId;
 }
@@ -101,7 +102,7 @@ contract Breeder is PullPayment, VRFConsumerBaseV2 {
                 childGenes,
                 request.fatherId,
                 request.motherId,
-                msg.sender
+                request.childReceiver
             );
 
         emit BredByBirth(request.contractAddress, child.tokenId);
