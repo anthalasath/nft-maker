@@ -38,7 +38,7 @@ async function getVRFCoordinatorV2Config(hre: HardhatRuntimeEnvironment): Promis
         vrfCoordinatorV2Address = mock.address;
         subId = await createFundedSubcription(mock);
     } else {
-        const vrfCoordinator = await hre.ethers.getContractAt(VRFCoordinatorV2InterfaceArtifact.abi, getAddresses().VRFCoordinatorV2);
+        const vrfCoordinator = await hre.ethers.getContractAt(VRFCoordinatorV2InterfaceArtifact.abi, getAddresses()[hre.network.name].VRFCoordinatorV2);
         vrfCoordinatorV2Address = vrfCoordinator.address;
         const networkConfig: any = config.networks?.[hre.network.name];
         if (!networkConfig) {
