@@ -1,11 +1,14 @@
 {
  "unknown": {
   "Breeder": "0xA78DcA2be6082203BC7ab351660beDE0D5B459e6",
-  "BreedableNFTDeployer": "0x740E855Eb5055A0C702D6c8f14E7d5e2eBaEa6De"
+  "BreedableNFTDeployer": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
  },
  "rinkeby": {
   "Breeder": "0x5b7e1952E583081096303e2CFA3C46014E75B41c",
-  "BreedableNFTDeployer": "0x164F3758cF376BD3F0658eEE352BF061a8eFE201",
+  "BreedableNFTDeployer": "0xf508A33C30E6fe46A66366e21755d9A635Ecb89F",
   "VRFCoordinatorV2": "0x6168499c0cFfCaCD319c818142124B7A15E857ab"
+ },
+ "hardhat": {
+  "Breeder": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
  }
 }

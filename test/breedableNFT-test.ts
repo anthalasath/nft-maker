@@ -1,21 +1,22 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
-import { deployBreedableNFT, deployBreedableNFTDeployer, deployBreeder } from "../scripts/deploy";
+import { BigNumber, utils } from "ethers";
+import * as hre from "hardhat";
+import { deployBreedableNFT, deployBreedableNFTDeployer } from "../scripts/deploy";
 import { getEvent, newDummyPicturePartCategory } from "../scripts/utils";
+import { deployBreeder } from "../tasks/deployBreeder";
 import { BreedableNFT, PromoCreatureMintedEvent } from "../typechain-types/contracts/BreedableNFT";
 
 describe("BreedableNFT", function () {
   const name = "Gremlins";
   const symbol = "GREM";
-  const breedingFeeInWei = ethers.utils.parseEther("1");
+  const breedingFeeInWei = utils.parseEther("1");
   const fatherGeneChance = 45;
   const motherGeneChance = 45;
   const picturePartCategories = ["Head", "Hat", "Eyes"].map(newDummyPicturePartCategory);
 
   async function deploy(): Promise<BreedableNFT> {
     const deployer = await deployBreedableNFTDeployer();
-    const { breeder } = await deployBreeder();
+    const { breeder } = await deployBreeder(hre);
     return await deployBreedableNFT(deployer, {
       name,
       symbol,
