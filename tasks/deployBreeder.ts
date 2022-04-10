@@ -3,7 +3,7 @@ import { createFundedSubcription, writeAddress } from "./taskUtils";
 import { Breeder } from "../typechain-types/contracts/Breeder";
 import { VRFCoordinatorV2Mock } from "../typechain-types/contracts/test/VRFCoordinatorV2Mock";
 import { BigNumberish } from "ethers";
-import LOCAL_NETWORKS from "./localNeworks";
+import {LOCAL_NETWORKS} from "./localNeworks";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import Addresses from "../tasks/addresses.json";
 import config from "../hardhat.config";
