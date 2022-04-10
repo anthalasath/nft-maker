@@ -32,7 +32,7 @@ export async function deployVRFCoordinatorV2Mock(): Promise<VRFCoordinatorV2Mock
     return vrfCoordinatorV2Mock as VRFCoordinatorV2Mock;
 }
 
-const DEV_NETWORKS = (() => {
+const LOCAL_NETWORKS = (() => {
     const networks = new Set<string>();
     networks.add("hardhat");
     networks.add("unknown");
@@ -55,7 +55,7 @@ async function getVRFCoordinatorV2Config(): Promise<VRFCoordinatorV2Config> {
     let subId: BigNumberish;
     const keyHash = "0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311"; // TODO: Double check how to get this
     let mock: VRFCoordinatorV2Mock | undefined;
-    if (DEV_NETWORKS.has(hre.network.name)) {
+    if (LOCAL_NETWORKS.has(hre.network.name)) {
         mock = await deployVRFCoordinatorV2Mock();
         vrfCoordinatorV2Address = mock.address;
         subId = await createFundedSubcription(mock);
