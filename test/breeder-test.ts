@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber, BigNumberish } from "ethers";
+import { ethers } from "hardhat";
 import { deploySampleBreedableNFT } from "../scripts/deploy";
 import { getEvent, mintPromo, waitForTx } from "../scripts/utils";
 import { BreedableNFT, CreatureStruct } from "../typechain-types/contracts/BreedableNFT";
@@ -16,14 +17,14 @@ describe("Breeder", function () {
     const mother = await mintPromo(breedableNFT, [4, 5, 6]);
     const filter = breeder.filters.BreedingStarted(breedableNFT.address, father.tokenId, mother.tokenId);
     const breedingFeeInWei = await breedableNFT.getBreedingFee();
-    const childReceiver = await breeder.signer.getAddress();
+    const expectedChildReceiver = await breeder.signer.getAddress();
 
     const tx = await breeder.breed(
       {
         fatherId: father.tokenId,
         motherId: mother.tokenId,
         contractAddress: breedableNFT.address,
-        childReceiver
+        childReceiver: expectedChildReceiver
       }, {
       value: breedingFeeInWei
     });
@@ -50,17 +51,18 @@ describe("Breeder", function () {
     const randomWordsRequestedFilter = vrfCoordinatorV2Config.mock.filters.RandomWordsRequested(vrfCoordinatorV2Config.keyHash, null, null, vrfCoordinatorV2Config.subId);
     const bredByBirthFilter = breeder.filters.BredByBirth(breedableNFT.address, expectedChildId);
     const breedingFeeInWei = await breedableNFT.getBreedingFee();
-    const childReceiver = await breeder.signer.getAddress();
+    const expectedChildReceiver = await breeder.signer.getAddress();
 
-    await waitForTx(breeder.breed(
+    const breedTx = await breeder.breed(
       {
         fatherId: father.tokenId,
         motherId: mother.tokenId,
         contractAddress: breedableNFT.address,
-        childReceiver
+        childReceiver: expectedChildReceiver
       }, {
       value: breedingFeeInWei
-    }));
+    });
+    const breedReceipt = await breedTx.wait();
 
     const emittedRandomWordsRequestedEvents = await vrfCoordinatorV2Config.mock.queryFilter(randomWordsRequestedFilter);
     expect(emittedRandomWordsRequestedEvents.length).to.eq(1);
@@ -72,7 +74,24 @@ describe("Breeder", function () {
     expect(bredByBirthEvent.args.contractAddress).to.eq(breedableNFT.address);
     expect(bredByBirthEvent.args.childId).to.eq(expectedChildId);
     const child = await breedableNFT.getCreature(expectedChildId);
-    expect(await breedableNFT.ownerOf(child.tokenId)).to.eq(childReceiver);
+    expect(child.tokenId).to.eq(expectedChildId);
+    expect(await breedableNFT.ownerOf(child.tokenId)).to.eq(expectedChildReceiver);
+    expect(child.fatherId).to.eq(father.tokenId);
+    expect(child.motherId).to.eq(mother.tokenId);
+    expect(child.genes).to.deep.eq([
+      "78541660797044910968829902406342334108369226379826116161446442989268089806461",
+      "92458281274488595289803937127152923398167637295201432141969818930235769911599",
+      "3"]
+      .map(BigNumber.from));
+    expect(child.breedingBlockedUntil).to.eq(0);
+    const fatherAfterBreeding = await breedableNFT.getCreature(father.tokenId);
+    const motherAfterBreeding = await breedableNFT.getCreature(mother.tokenId);
+    const block = await breeder.provider.getBlock(breedTx.blockNumber!);
+    const breedingCooldown = await breedableNFT.breedingCooldown();
+    const expectedBreedingBlockedUntilForParents = breedingCooldown.add(block.timestamp);
+    
+    expect(fatherAfterBreeding.breedingBlockedUntil).to.eq(expectedBreedingBlockedUntilForParents);
+    expect(motherAfterBreeding.breedingBlockedUntil).to.eq(expectedBreedingBlockedUntilForParents);
   });
 });
 
