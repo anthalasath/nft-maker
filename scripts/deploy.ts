@@ -36,7 +36,6 @@ const DEV_NETWORKS = (() => {
     const networks = new Set<string>();
     networks.add("hardhat");
     networks.add("unknown");
-    networks.add("rinkeby");
     return networks;
 })();
 

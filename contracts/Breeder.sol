@@ -20,7 +20,7 @@ contract Breeder is PullPayment, VRFConsumerBaseV2 {
     bytes32 keyHash;
     uint64 subId;
     uint16 constant minimumRequestConfirmations = 3;
-    uint32 constant callbackGasLimit = 100000000;   
+    uint32 constant callbackGasLimit = 1000000;   
 
     mapping(uint256 => Request) contractByRequestId;
 
