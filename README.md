@@ -3,15 +3,11 @@
 A no-code utility to make nfts. 
 Right now, breedable nfts (like cryptokitties) are planned for the MVP.
 
-## TODO:
-
-### high prio:
-- Use VRF to make rolls random
-- 
-### low prio
+### todo low prio
 - allow configuration of breeding CD
 - Test unhappy paths and reverts
 - Gas efficiency ? Do we need to store the picture part categories on an IPFS file and jus thave a link to it for the assembler ?
+- Remove unusued code (e.g onlyOwnerOf modifier in BreedableNFT.sol)
 
 
 
