@@ -114,6 +114,7 @@ contract BreedableNFT is ERC721, Ownable {
         return (fatherGeneChance, motherGeneChance);
     }
 
+    // TODO: Block timestamp will not work in a call, only for txs
     function canBreed(uint256 tokenId) external view returns (bool) {
         if (!_exists(tokenId)) {
             revert InexistentCreature(tokenId);
