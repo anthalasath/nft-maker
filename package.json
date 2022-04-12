@@ -1,6 +1,6 @@
 {
   "name": "nft-maker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A no code utility to make nfts",
   "main": "index.js",
   "scripts": {
