@@ -1,6 +1,8 @@
 ## Overview
 
 A no-code utility to make nfts. 
+# NOT SUITABLE FOR PRODUCTION USE!
+
 Right now, breedable nfts (like cryptokitties) are planned for the MVP.
 
 ### todo low prio
