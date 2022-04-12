@@ -1,13 +1,13 @@
 {
   "name": "nft-maker",
   "version": "1.0.0",
-  "description": "",
+  "description": "A no code utility to make nfts",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
