@@ -5,6 +5,7 @@ import "@typechain/hardhat";
 import "./tasks/overview";
 import "./tasks/deployDeployer";
 import "./tasks/deployBreeder";
+import "./tasks/getPictureData";
 import "dotenv/config";
 
 // This is a sample Hardhat task. To learn how to create your own go to
